@@ -47,3 +47,23 @@
 1443026921 source:/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 
+1443027837 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
+	"EstacionMeteo.hpp"
+
+1443027786 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+	"RCSwitch.h"
+	<thread>
+
+1443026921 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/RCSwitch.h
+	"Arduino.h"
+	<wiringPi.h>
+	<stdint.h>
+
+1443027786 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
+	<fstream>
+	<iostream>
+	"EstacionMeteo.hpp"
+
+1443026921 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
+	"RCSwitch.h"
+
