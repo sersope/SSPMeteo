@@ -1,0 +1,49 @@
+# depslib dependency file v1.0
+1443001244 source:/home/sergio/ssp-ws/SSPMeteo/src/main.cpp
+	<fstream>
+	<iostream>
+	"EstacionMeteo.hpp"
+
+1442850260 /home/sergio/ssp-ws/SSPMeteo/include/Receptor.hpp
+	"RCSwitch.h"
+
+1442942797 /home/sergio/ssp-ws/SSPMeteo/include/RCSwitch.h
+	"Arduino.h"
+	<wiringPi.h>
+	<stdint.h>
+
+1442942797 source:/home/sergio/ssp-ws/SSPMeteo/src/RCSwitch.cpp
+	"RCSwitch.h"
+
+1442914125 source:/home/sergio/ssp-ws/SSPMeteo/src/Receptor.cpp
+	"Receptor.hpp"
+
+1443001804 /home/sergio/ssp-ws/SSPMeteo/include/EstacionMeteo.hpp
+	"RCSwitch.h"
+	<thread>
+	<iostream>
+
+1443001804 source:/home/sergio/ssp-ws/SSPMeteo/src/EstacionMeteo.cpp
+	"EstacionMeteo.hpp"
+
+1443026921 source:/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
+	"RCSwitch.h"
+
+1443026921 /home/pi/dev/SSPMeteo/include/RCSwitch.h
+	"Arduino.h"
+	<wiringPi.h>
+	<stdint.h>
+
+1442943615 source:/home/pi/dev/SSPMeteo/src/main.cpp
+	<fstream>
+	<iostream>
+	"EstacionMeteo.hpp"
+
+1443027199 /home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+	"RCSwitch.h"
+	<thread>
+	<iostream>
+
+1443026921 source:/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
+	"EstacionMeteo.hpp"
+
