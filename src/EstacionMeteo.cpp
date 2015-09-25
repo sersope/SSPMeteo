@@ -28,7 +28,7 @@ bool EstacionMeteo::arranca()
         return false;
     else
     {
-        rcswitch.enableReceive(RF_PIN);
+        receptor.enableReceive(RF_PIN);
         philo = new std::thread(&EstacionMeteo::procesa, this);
         return true;
     }
@@ -40,10 +40,10 @@ void EstacionMeteo::procesa()
     while(!parar)
     {
         mensaje = 0;
-        if (rcswitch.available())
+        if (receptor.available())
         {
-            mensaje = rcswitch.getReceivedValue();
-            rcswitch.resetAvailable();
+            mensaje = receptor.getReceivedValue();
+            receptor.resetAvailable();
             n = (mensaje & 0xFF0000) >> 16; //Nº del mensaje
             printf("%d",n); //DEBUG
             if (n >= 1 && n <= N_MENSAJES && mensaje != mensaje_ant)

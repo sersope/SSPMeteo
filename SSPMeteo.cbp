@@ -45,15 +45,14 @@ Use wiringPi library.]]>
 			<Add library="wiringPi" />
 		</Linker>
 		<Unit filename="include/EstacionMeteo.hpp" />
-		<Unit filename="include/RCSwitch.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="include/ReceptorRF433.hpp" />
 		<Unit filename="src/EstacionMeteo.cpp" />
-		<Unit filename="src/RCSwitch.cpp" />
+		<Unit filename="src/ReceptorRF433.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

@@ -1,7 +1,7 @@
 #ifndef ESTACION_METEO_HPP
 #define ESTACION_METEO_HPP
 
-#include "RCSwitch.h"
+#include "ReceptorRF433.hpp"
 #include <thread>
 
 // TODO (sergio#1#23/09/15): Añadir control de estado y errores de la clase.
@@ -27,7 +27,7 @@ class EstacionMeteo
         int getR(){ return datos.rain; };
     private:
         DatosMeteo datos;
-        RCSwitch rcswitch;
+        ReceptorRF433 receptor;
         std::thread *philo;
         int mensaje;
         int mensaje_ant;
