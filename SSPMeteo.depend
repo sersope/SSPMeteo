@@ -50,18 +50,17 @@
 1443027837 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 
-1443027786 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
-	"RCSwitch.h"
-	<thread>
+1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
 
 1443026921 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/RCSwitch.h
 	"Arduino.h"
 	<wiringPi.h>
 	<stdint.h>
 
-1443027786 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
+1443548773 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
 	<fstream>
 	<iostream>
+	<wiringPi.h>
 	"EstacionMeteo.hpp"
 
 1443026921 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
@@ -92,4 +91,11 @@
 
 1443539374 source:/home/sergio/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
+
+1443548773 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
+	"ReceptorRF433.hpp"
+
+1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
+	<wiringPi.h>
+	<stdint.h>
 

@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/sspmeteo
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/src/EstacionMeteo.o $(OBJDIR_DEBUG)/src/RCSwitch.o $(OBJDIR_DEBUG)/src/main.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/src/EstacionMeteo.o $(OBJDIR_DEBUG)/src/ReceptorRF433.o $(OBJDIR_DEBUG)/src/main.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/src/EstacionMeteo.o $(OBJDIR_RELEASE)/src/RCSwitch.o $(OBJDIR_RELEASE)/src/main.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/src/EstacionMeteo.o $(OBJDIR_RELEASE)/src/ReceptorRF433.o $(OBJDIR_RELEASE)/src/main.o
 
 all: debug release
 
@@ -62,8 +62,8 @@ out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
 $(OBJDIR_DEBUG)/src/EstacionMeteo.o: src/EstacionMeteo.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/EstacionMeteo.cpp -o $(OBJDIR_DEBUG)/src/EstacionMeteo.o
 
-$(OBJDIR_DEBUG)/src/RCSwitch.o: src/RCSwitch.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/RCSwitch.cpp -o $(OBJDIR_DEBUG)/src/RCSwitch.o
+$(OBJDIR_DEBUG)/src/ReceptorRF433.o: src/ReceptorRF433.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/ReceptorRF433.cpp -o $(OBJDIR_DEBUG)/src/ReceptorRF433.o
 
 $(OBJDIR_DEBUG)/src/main.o: src/main.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/main.cpp -o $(OBJDIR_DEBUG)/src/main.o
@@ -87,8 +87,8 @@ out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
 $(OBJDIR_RELEASE)/src/EstacionMeteo.o: src/EstacionMeteo.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/EstacionMeteo.cpp -o $(OBJDIR_RELEASE)/src/EstacionMeteo.o
 
-$(OBJDIR_RELEASE)/src/RCSwitch.o: src/RCSwitch.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/RCSwitch.cpp -o $(OBJDIR_RELEASE)/src/RCSwitch.o
+$(OBJDIR_RELEASE)/src/ReceptorRF433.o: src/ReceptorRF433.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/ReceptorRF433.cpp -o $(OBJDIR_RELEASE)/src/ReceptorRF433.o
 
 $(OBJDIR_RELEASE)/src/main.o: src/main.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/main.cpp -o $(OBJDIR_RELEASE)/src/main.o

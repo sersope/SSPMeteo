@@ -17,6 +17,9 @@
 
 bool EstacionMeteo::arranca()
 {
+    temp = -70.0;
+    humi = 0.0;
+    rain = 0;
     return ReceptorRF433::arranca();
 }
 
