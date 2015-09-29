@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <wiringPi.h>
 
 #include "EstacionMeteo.hpp"
 
@@ -9,7 +10,7 @@ int main(int argc, char *argv[])
 
     if (!estacion.arranca())
     {
-        std::cout << "No se pudo conectar con la estación.." << std::endl;
+        std::cout << "No se pudo conectar con la estación..\n" << std::endl;
         return 0;
     }
 

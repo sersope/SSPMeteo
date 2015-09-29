@@ -1,37 +1,16 @@
-#ifndef ESTACION_METEO_HPP
-#define ESTACION_METEO_HPP
-
-#include "ReceptorRF433.hpp"
-#include <thread>
-
-// TODO (sergio#1#23/09/15): Añadir control de estado y errores de la clase.
-const int N_MENSAJES = 3;   // Número total de mensajes
-const int RF_PIN = 2;
-
-struct DatosMeteo
-{
-    float temp;
-    float humi;
-    int rain;
-};
+#ifndef __ESTACION__METEO__HPP
+#define __ESTACION__METEO__HPP
 
 class EstacionMeteo
 {
     public:
-        EstacionMeteo();
-        virtual ~EstacionMeteo();
         bool arranca();
-        bool para();
-        float getT(){ return datos.temp; };
-        float getH(){ return datos.humi; };
-        int getR(){ return datos.rain; };
+        float getT();
+        float getH();
+        unsigned getR();
     private:
-        DatosMeteo datos;
-        ReceptorRF433 receptor;
-        std::thread *philo;
-        int mensaje;
-        int mensaje_ant;
-        bool parar;
-        void procesa();
+        float temp;
+        float humi;
+        int rain;
 };
-#endif // ESTACION_METEO_HPP
+#endif // __ESTACION__METEO__HPP
