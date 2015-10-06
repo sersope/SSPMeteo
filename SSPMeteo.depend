@@ -47,8 +47,9 @@
 1443026921 source:/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 
-1443027837 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
+1443549432 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
+	"ReceptorRF433.hpp"
 
 1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
 
@@ -98,4 +99,18 @@
 1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
 	<wiringPi.h>
 	<stdint.h>
+
+1444153118 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/SocketServer.cpp
+	"SocketServer.hpp"
+
+1444153118 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/SocketServer.hpp
+	<unistd.h>
+	<iostream>
+	<cstring>
+	<sys/socket.h>
+	<netdb.h>
+	<sys/select.h>
+	<list>
+	<thread>
+	<string>
 

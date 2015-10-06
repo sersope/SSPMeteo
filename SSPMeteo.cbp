@@ -46,8 +46,10 @@ Use wiringPi library.]]>
 		</Linker>
 		<Unit filename="include/EstacionMeteo.hpp" />
 		<Unit filename="include/ReceptorRF433.hpp" />
+		<Unit filename="include/SocketServer.hpp" />
 		<Unit filename="src/EstacionMeteo.cpp" />
 		<Unit filename="src/ReceptorRF433.cpp" />
+		<Unit filename="src/SocketServer.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />
