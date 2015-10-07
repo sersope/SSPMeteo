@@ -67,30 +67,31 @@
 1443026921 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
 	"RCSwitch.h"
 
-1443539562 source:/home/sergio/dev/SSPMeteo/src/EstacionMeteo.cpp
+1444197866 source:/home/sergio/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 	"ReceptorRF433.hpp"
 
-1443539562 /home/sergio/dev/SSPMeteo/include/EstacionMeteo.hpp
+1444197866 /home/sergio/dev/SSPMeteo/include/EstacionMeteo.hpp
 
 1443173884 /home/sergio/dev/SSPMeteo/include/RCSwitch.h
 	<wiringPi.h>
 	<stdint.h>
 
-1443537510 source:/home/sergio/dev/SSPMeteo/src/main.cpp
+1444212503 source:/home/sergio/dev/SSPMeteo/src/main.cpp
 	<fstream>
 	<iostream>
 	<wiringPi.h>
 	"EstacionMeteo.hpp"
+	"SocketServer.hpp"
 
 1443172914 source:/home/sergio/dev/SSPMeteo/src/RCSwitch.cpp
 	"RCSwitch.h"
 
-1443540492 /home/sergio/dev/SSPMeteo/include/ReceptorRF433.hpp
+1444197866 /home/sergio/dev/SSPMeteo/include/ReceptorRF433.hpp
 	<wiringPi.h>
 	<stdint.h>
 
-1443539374 source:/home/sergio/dev/SSPMeteo/src/ReceptorRF433.cpp
+1444197866 source:/home/sergio/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
 
 1443548773 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
@@ -113,4 +114,18 @@
 	<list>
 	<thread>
 	<string>
+
+1444211974 /home/sergio/dev/SSPMeteo/include/SocketServer.hpp
+	<unistd.h>
+	<iostream>
+	<cstring>
+	<sys/socket.h>
+	<netdb.h>
+	<sys/select.h>
+	<list>
+	<thread>
+	<string>
+
+1444213486 source:/home/sergio/dev/SSPMeteo/src/SocketServer.cpp
+	"SocketServer.hpp"
 

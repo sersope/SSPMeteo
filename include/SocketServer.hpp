@@ -13,6 +13,7 @@
 
 typedef std::thread * pthread;
 
+// TODO (sergio#1#07/10/15): Considerar log file para esta clase
 class SocketServer
 {
     public:
