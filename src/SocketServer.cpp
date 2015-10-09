@@ -1,8 +1,10 @@
 #include "SocketServer.hpp"
 
-SocketServer::SocketServer(std::string port)
+SocketServer::SocketServer(std::string port, EstacionMeteo & estacion)
 {
-    this->port = port;    terminar = false;
+    this->port = port;
+    this->estacion = estacion;
+    terminar = false;
 }
 
 bool SocketServer::arranca()
@@ -102,7 +104,7 @@ void SocketServer::atiende_cliente(int sd_client)
         // Los caracteres de escape son para telnet
         if(msg_in == "getcurrent\r\n")
         {
-            msg_out = "Has solicitado datos actuales\n";
+            msg_out = estacion.getcurrent();
         }
         else if(msg_in == "getdaily\r\n")
         {

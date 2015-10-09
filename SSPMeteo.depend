@@ -47,22 +47,23 @@
 1443026921 source:/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 
-1443549432 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
+1444248372 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 	"ReceptorRF433.hpp"
 
-1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+1444248372 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
 
 1443026921 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/RCSwitch.h
 	"Arduino.h"
 	<wiringPi.h>
 	<stdint.h>
 
-1443548773 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
+1444385546 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
 	<fstream>
 	<iostream>
 	<wiringPi.h>
 	"EstacionMeteo.hpp"
+	"SocketServer.hpp"
 
 1443026921 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
 	"RCSwitch.h"
@@ -94,17 +95,17 @@
 1444197866 source:/home/sergio/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
 
-1443548773 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
+1444383559 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
+	<iostream>
 
-1443548773 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
+1444381769 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
 	<wiringPi.h>
-	<stdint.h>
 
-1444153118 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/SocketServer.cpp
+1444385457 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/SocketServer.cpp
 	"SocketServer.hpp"
 
-1444153118 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/SocketServer.hpp
+1444385457 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/SocketServer.hpp
 	<unistd.h>
 	<iostream>
 	<cstring>
@@ -114,6 +115,7 @@
 	<list>
 	<thread>
 	<string>
+	"EstacionMeteo.hpp"
 
 1444211974 /home/sergio/dev/SSPMeteo/include/SocketServer.hpp
 	<unistd.h>

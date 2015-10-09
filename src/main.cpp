@@ -1,4 +1,3 @@
-#include <fstream>
 #include <iostream>
 #include <wiringPi.h> // Para el delay en main()
 
@@ -9,8 +8,6 @@
 
 int main(int argc, char *argv[])
 {
-    SocketServer sserver("5556");
-    sserver.arranca();
 
 #ifndef NO_RPI
     EstacionMeteo estacion;
@@ -22,11 +19,12 @@ int main(int argc, char *argv[])
     }
 #endif // NO_RPI
 
-//    std::ofstream outf("Mensajes.dat", std::ios::app);
+    SocketServer sserver("5556", estacion);
+    sserver.arranca();
+
     while(true)
     {
 //        std::cout << " Temperatura: " << estacion.getT() << " Humedad: " << estacion.getH() << " Lluvia: " << estacion.getR() << std::endl;
-//        outf << " Temperatura: " << estacion.getT() << " Humedad: " << estacion.getH() << " Lluvia: " << estacion.getR() << std::endl;
         delay(3000);
     }
 

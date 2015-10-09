@@ -27,7 +27,7 @@
 #define __RECEPTOR__RF__433_HPP
 
 #include <wiringPi.h>
-#include <stdint.h>
+//#include <stdint.h>
 
 class ReceptorRF433
 {

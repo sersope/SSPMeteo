@@ -14,6 +14,7 @@
 */
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
+#include <sstream>
 
 bool EstacionMeteo::arranca()
 {
@@ -39,4 +40,12 @@ unsigned EstacionMeteo::getR()
 {
     rain = ReceptorRF433::mensaje_tipo[2] & 0xFFFF;
     return rain;
+}
+
+std::string EstacionMeteo::getcurrent()
+{
+    std::stringstream ss;
+    ss << "T= " << getT() << " H= " << getH() << " R= " << getR() << std::endl;
+    return ss.str();
+
 }

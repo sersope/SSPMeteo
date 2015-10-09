@@ -1,5 +1,5 @@
 #include "ReceptorRF433.hpp"
-
+#include <iostream>
 //unsigned long ReceptorRF433::nReceivedValue = 0;
 //unsigned int ReceptorRF433::nReceivedBitlength = 0;
 //unsigned int ReceptorRF433::nReceivedDelay = 0;
@@ -91,7 +91,10 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         // Según el tipo de mensaje asigna al array de mensajes.
         int n = (code & 0xFF0000) >> 16; //Nº del mensaje
         if (n >= 1 && n <= N_MENSAJES)
-            mensaje_tipo[n-1] = code;
+        {
+           mensaje_tipo[n-1] = code;
+//           std::cout << n;
+        }
     }
     if (code == 0)
         return false;
