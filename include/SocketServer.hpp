@@ -16,7 +16,6 @@
 typedef std::thread * pthread;
 
 // TODO (sergio#1#07/10/15): Considerar log file para esta clase
-// TODO (sergio#1#09/10/15): Añadir miembro private EstacionMeteo
 class SocketServer
 {
     public:

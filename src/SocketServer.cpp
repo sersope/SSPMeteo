@@ -5,13 +5,18 @@ SocketServer::SocketServer(std::string port, EstacionMeteo & estacion)
     this->port = port;
     this->estacion = estacion;
     terminar = false;
+    pt = 0;
 }
 
 bool SocketServer::arranca()
 {
-    // TODO (sergio#1#07/10/15): Impedir un nuevo arranque
-    pt = new std::thread(&SocketServer::escucha, this);
-    return true;
+    if(!pt)
+    {
+        pt = new std::thread(&SocketServer::escucha, this);
+        return true;
+    }
+    else
+        return false;
 }
 
 void SocketServer::escucha()
@@ -101,7 +106,7 @@ void SocketServer::atiende_cliente(int sd_client)
         }
         msg_in.assign(recv_buff,bytes_recieved);
         std::cout << " Recibido (fd " <<  sd_client << "):" << bytes_recieved << " " << msg_in;
-        // Los caracteres de escape son para telnet
+        // NOTE: Los caracteres de escape son para telnet
         if(msg_in == "getcurrent\r\n")
         {
             msg_out = estacion.getcurrent();
@@ -127,10 +132,11 @@ void SocketServer::atiende_cliente(int sd_client)
         }
     }
     close(sd_client);
-    std::cout << "Conexión cerrada (fd "  <<  sd_client << ")" << std::endl;
+    std::cout << "Conexión cerrada por cliente (fd "  <<  sd_client << ")" << std::endl;
 }
 void SocketServer::termina()
 {
+    // TODO (sergio#1#09/10/15): Terminar threads de clientes
     terminar = true;
     pt->join();
 }

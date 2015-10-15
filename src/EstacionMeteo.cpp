@@ -15,6 +15,9 @@
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
 #include <sstream>
+#include <cereal/archives/json.hpp>
+#include <cereal/types/vector.hpp>
+
 
 bool EstacionMeteo::arranca()
 {
@@ -45,7 +48,11 @@ unsigned EstacionMeteo::getR()
 std::string EstacionMeteo::getcurrent()
 {
     std::stringstream ss;
-    ss << "T= " << getT() << " H= " << getH() << " R= " << getR() << std::endl;
+    {
+        cereal::JSONOutputArchive archive( ss );
+        archive(cereal::make_nvp("temp",getT()),
+                cereal::make_nvp("humi",getH()),
+                cereal::make_nvp("rain",getR()));
+    }
     return ss.str();
-
 }

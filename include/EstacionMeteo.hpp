@@ -10,7 +10,7 @@ class EstacionMeteo
         float getT();
         float getH();
         unsigned getR();
-        std::string getcurrent();// TODO (sergio#1#09/10/15): Implementar con cereal JSON
+        std::string getcurrent();
     private:
         float temp;
         float humi;

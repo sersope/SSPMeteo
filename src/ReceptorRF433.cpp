@@ -82,7 +82,7 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         }
     }
     code = code >> 1;
-    if (changeCount > 6)      // ignore < 4bit values as there are no devices sending 4bit values => noise
+    if (changeCount/2 == 24)      // considera solo mensajes de 24 bits
     {
 //        ReceptorRF433::nReceivedValue = code;
 //        ReceptorRF433::nReceivedBitlength = changeCount / 2;
@@ -93,7 +93,7 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         if (n >= 1 && n <= N_MENSAJES)
         {
            mensaje_tipo[n-1] = code;
-//           std::cout << n;
+//           std::cout << n << "-" << changeCount / 2 << " ";    // Muestra el nº de mensajes del mismo tipo y su longitud
         }
     }
     if (code == 0)

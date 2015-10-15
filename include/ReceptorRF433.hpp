@@ -38,7 +38,7 @@ class ReceptorRF433
     static const int N_MENSAJES = 3;   // Número total de mensajes
 
 //  static unsigned long nReceivedValue;        // Aqui está el mensaje recibido o es 0
-//  static unsigned int nReceivedBitlength;     // Valor solo informativo
+//    static unsigned int nReceivedBitlength;     // Valor solo informativo
 //	static unsigned int nReceivedDelay;         // Valor solo informativo
 //	static unsigned int nReceivedProtocol;      // Valor solo informativo
     static unsigned int timings[PACKET_MAX_CHANGES];
