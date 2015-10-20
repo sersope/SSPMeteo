@@ -3,4 +3,6 @@ obj/*
 *.dat
 *.layout
 include/cereal/*
+/docs/*.pdf
+/docs/*.bak
 
