@@ -1,9 +1,17 @@
 #include "SocketServer.hpp"
 
-SocketServer::SocketServer(std::string port, EstacionMeteo & estacion)
+#include <unistd.h>     // Necesario para close()
+#include <cstring>      // Needed for memset
+#include <sys/socket.h> // Needed for the socket functions
+#include <netdb.h>      // Needed for the socket functions
+#include <sys/select.h> // Needed for the socket functions
+#include <chrono>
+
+SocketServer::SocketServer(std::string port, EstacionMeteo & estacion, Anotador & log)
 {
     this->port = port;
     this->estacion = estacion;
+    this->log = log;
     terminar = false;
     pt = 0;
 }
@@ -21,6 +29,7 @@ bool SocketServer::arranca()
 
 void SocketServer::escucha()
 {
+    log.anota("Arrancando servidor ...");
     // Preparar/obtener la direccion del host y tipo de socket
     addrinfo host_info;                         // The struct that getaddrinfo() fills up with data.
     addrinfo *host_info_list;                   // Pointer to the to the linked list of host_info's.
@@ -30,27 +39,26 @@ void SocketServer::escucha()
     host_info.ai_flags = AI_PASSIVE;            // IP Wildcard
     int status = getaddrinfo(NULL, port.c_str(), &host_info, &host_info_list);
     if (status != 0)
-        std::cout << "GETADDRINFO ERROR" << gai_strerror(status) ;
+        log.anota("ERROR AL HACER GETADDRINFO. SocketServer::escucha()") /*<< gai_strerror(status)*/ ;
 
     // Crear el socket
     int sd_server = socket(host_info_list->ai_family, host_info_list->ai_socktype,  host_info_list->ai_protocol);
     if (sd_server == -1)
-        std::cout << "SOCKET ERROR" ;
+        log.anota("ERROR AL CREAR EL SOCKET. SocketServer::escucha()");
 
     // Unir el socket al host
     int yes = 1;
     status = setsockopt(sd_server, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)); // make sure the port is not in use by a previous execution of our code. (see man page for more information)
     status = bind(sd_server, host_info_list->ai_addr, host_info_list->ai_addrlen);
     if (status == -1)
-        std::cout << "BIND ERROR" << std::endl ;
+        log.anota("ERROR AL HACER BIND. SocketServer::escucha()");
 
     freeaddrinfo(host_info_list);
 
     // Ponerse a la escucha
-    std::cout << "A la escucha ..."  << std::endl;
     status =  listen(sd_server, 5);
     if (status == -1)
-        std::cout << "LISTEN ERROR" << std::endl ;
+        log.anota("ERROR AL HACER LISTEN. SocketServer::escucha()");
 
     // Bucle de muestreo de nuevas conexiones
     fd_set readfds;
@@ -65,7 +73,7 @@ void SocketServer::escucha()
         int activity = select(sd_server + 1, &readfds, NULL, NULL, &timeout);
         if(activity < 0)
         {
-            std::cout <<"SELECT ERROR";
+            log.anota("ERROR EN SELECT. SocketServer::escucha()");
             continue;
         }
         // Nueva conexion cliente. Se accepta y se crea el thread para atender las peticiones del cliente.
@@ -75,11 +83,11 @@ void SocketServer::escucha()
             socklen_t client_addr_s = sizeof(client_addr);
             int sd_client = accept(sd_server, (sockaddr *)&client_addr, &client_addr_s);
             pt_list.push_back(new std::thread(&SocketServer::atiende_cliente, this, sd_client));
-            std::cout << "Nueva conexión aceptada (fd "  <<  sd_client << ")" << std::endl;
+            log.anota("Nueva conexión cliente aceptada.");
         }
     }
-    std::cout << "Parando servidor ..." << std::endl;
     close(sd_server);
+    log.anota("Conexión servidor cerrada.");
 }
 // TODO (sergio#1#06/10/15): Completar protocolo con cliente
 void SocketServer::atiende_cliente(int sd_client)
@@ -89,23 +97,22 @@ void SocketServer::atiende_cliente(int sd_client)
     ssize_t bytes_recieved, bytes_sent;
     std::string msg_in, msg_out;
 
-    while(!fin)
+    while(!fin && !terminar)
     {
-        // Recibir
-        bytes_recieved = recv(sd_client, recv_buff,100, 0);
+        // Recibir sin esperar
+        bytes_recieved = recv(sd_client, recv_buff,100, MSG_DONTWAIT);
         if (bytes_recieved == 0)
         {
             fin = true;
             continue;
         }
-        if (bytes_recieved == -1)
+        if (bytes_recieved == -1) //No se ha recibido nada o error
         {
-            std::cout << "RECIEVE ERROR" << std::endl ;
-            fin = true;
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); //Espera y vueleve a recibir
             continue;
         }
+        //Algo se ha recibido
         msg_in.assign(recv_buff,bytes_recieved);
-        std::cout << " Recibido (fd " <<  sd_client << "):" << bytes_recieved << " " << msg_in;
         // NOTE: Los caracteres de escape son para telnet
         if(msg_in == "getcurrent\r\n")
         {
@@ -126,19 +133,28 @@ void SocketServer::atiende_cliente(int sd_client)
         bytes_sent = send(sd_client, msg_out.c_str(), msg_out.length(), 0);
         if (bytes_sent == -1)
         {
-            std::cout << "SEND ERROR" << std::endl ;
+            log.anota("ERROR AL HACER SEND. SocketServer::atiende_cliente()");
             fin = true;
             continue;
         }
     }
     close(sd_client);
-    std::cout << "Conexión cerrada por cliente (fd "  <<  sd_client << ")" << std::endl;
+    log.anota("Conexión cliente cerrada.");
 }
 void SocketServer::termina()
 {
-    // TODO (sergio#1#09/10/15): Terminar threads de clientes
+    // Cerrando threads servidor y threads de clientes
+    log.anota("Cerrando servidor...");
     terminar = true;
     pt->join();
+    for( auto it = pt_list.begin(); it != pt_list.end(); it++)
+    {
+        if((*it)->joinable())
+        {
+            log.anota("Cerrando cliente...");
+            (*it)->join();
+        }
+    }
 }
 
 SocketServer::~SocketServer()

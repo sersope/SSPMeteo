@@ -1,12 +1,15 @@
 #include <iostream>
 #include <string>
-//#include <wiringPi.h> // Para el delay en main()
 
 #include "EstacionMeteo.hpp"
 #include "SocketServer.hpp"
+#include "Anotador.hpp"
 
 int main(int argc, char *argv[])
 {
+
+    Anotador thelog("sspmeteo.log");
+    thelog.anota("---------------------");
 
     EstacionMeteo estacion;
     std::cout << "\nEstación meteo arrancando...\n";
@@ -16,21 +19,21 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    SocketServer sserver("5556", estacion);
+    SocketServer sserver("5556", estacion, thelog);
     sserver.arranca();
 
-    std::cout << std::endl << "Pulse q(Q) para terminar..." << std::endl;
+    std::cout << std::endl << "Pulse q(Q)+Intro  para terminar..." << std::endl;
     bool salir = false;
     std::string tecla;
+
     while(!salir)
     {
         std::cin >> tecla;
-        salir = (tecla=="q" | tecla=="Q");
-//        std::cout << " Temperatura: " << estacion.getT() << " Humedad: " << estacion.getH() << " Lluvia: " << estacion.getR() << std::endl;
-//        delay(3000);
+        salir = (tecla=="q" || tecla=="Q");
     }
 
     // Se debe parar el servidor
+    estacion.termina();
     sserver.termina();
 
     return 0;

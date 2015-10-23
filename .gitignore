@@ -1,6 +1,8 @@
 bin/*
 obj/*
 *.dat
+*.log
+*.txt
 *.layout
 include/cereal/*
 docs/*.pdf

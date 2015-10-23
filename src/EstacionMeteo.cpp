@@ -14,17 +14,84 @@
 */
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
+
 #include <sstream>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
+#include <ctime>
+#include <thread>
+#include <Anotador.hpp>
 
+EstacionMeteo::EstacionMeteo()
+{
+    pth = 0;
+}
+
+EstacionMeteo::~EstacionMeteo()
+{
+    //delete pth;
+}
 
 bool EstacionMeteo::arranca()
 {
+    terminar = false;
+    pth = new std::thread(&EstacionMeteo::procesa, this);
+
     temp = -70.0;
     humi = 0.0;
     rain = 0;
-    return ReceptorRF433::arranca();
+////////////////    return ReceptorRF433::arranca();
+    return true;// FIXME (sergio#1#22/10/15): ARREGLAR PARA EJECUTAR EN LA RASPBERRY
+}
+
+void EstacionMeteo::termina()
+{
+    if(pth != 0)
+    {
+        terminar = true;
+        pth->join();
+    }
+}
+
+void EstacionMeteo::procesa()
+{
+    Anotador log("EstacionMeteo.log");
+    double periodo_lectura = 60.0;          // segundos
+    double periodo_salvadatos = 15 * 60.0;  // segundos
+    time_t timer_lectura,timer_salvadatos,ahora;
+    time(&ahora);
+    timer_lectura = ahora;
+    timer_salvadatos = ahora;
+    int hoy = localtime(&ahora)->tm_mday;
+    int ayer = hoy;
+
+    while(!terminar)
+    {
+        time(&ahora);
+        hoy = localtime(&ahora)->tm_mday;
+        if(difftime(ahora,timer_lectura) >= periodo_lectura)
+        {
+            // TODO: Leer datos actuales.
+            // Actualizar datos diarios
+            log.anota("Lectura de datos");
+            timer_lectura = ahora;
+        }
+        if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
+        {
+            // Salva datos actuales
+            log.anota("Salvado de datos");
+            timer_salvadatos = ahora;
+        }
+        if(hoy != ayer)
+        {
+            // Cambio de dia.
+            // Salvar datos diarios
+            // Resetear datos diarios
+            log.anota("Cambio de dia");
+            ayer = hoy;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
 }
 
 float EstacionMeteo::getT()
