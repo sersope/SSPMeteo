@@ -35,7 +35,7 @@ class ReceptorRF433
 	static const int RECEIVE_TOLERANCE = 60;
 	static const int PACKET_MAX_CHANGES = 67;
     static const int RF_PIN = 2;
-    static const int N_MENSAJES = 3;   // Número total de mensajes
+    static const int N_MENSAJES = 6;   // Número total de mensajes
 
 //  static unsigned long nReceivedValue;        // Aqui está el mensaje recibido o es 0
 //    static unsigned int nReceivedBitlength;     // Valor solo informativo

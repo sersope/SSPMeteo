@@ -40,8 +40,10 @@ bool EstacionMeteo::arranca()
     temp = -70.0;
     humi = 0.0;
     rain = 0;
-////////////////    return ReceptorRF433::arranca();
-    return true;// FIXME (sergio#1#22/10/15): ARREGLAR PARA EJECUTAR EN LA RASPBERRY
+    vel_vent = 0.0;
+    vel_racha = 0.0;
+    dir_vent = 0;
+    return ReceptorRF433::arranca();
 }
 
 void EstacionMeteo::termina()
@@ -112,6 +114,24 @@ unsigned EstacionMeteo::getR()
     return rain;
 }
 
+float EstacionMeteo::getVV()
+{
+    vel_vent = (ReceptorRF433::mensaje_tipo[3] & 0xFFFF) / 10.0;
+    return vel_vent;
+}
+
+float EstacionMeteo::getVR()
+{
+    vel_racha = (ReceptorRF433::mensaje_tipo[4] & 0xFFFF) / 10.0;
+    return vel_racha;
+}
+
+unsigned EstacionMeteo::getDV()
+{
+    dir_vent = ReceptorRF433::mensaje_tipo[5] & 0xFFFF;
+    return dir_vent;
+}
+
 std::string EstacionMeteo::getcurrent()
 {
     std::stringstream ss;
@@ -119,7 +139,10 @@ std::string EstacionMeteo::getcurrent()
         cereal::JSONOutputArchive archive( ss );
         archive(cereal::make_nvp("temp",getT()),
                 cereal::make_nvp("humi",getH()),
-                cereal::make_nvp("rain",getR()));
+                cereal::make_nvp("rain",getR()),
+                cereal::make_nvp("vel_vent",getVV()),
+                cereal::make_nvp("vel_racha",getVR()),
+                cereal::make_nvp("dir_vent",getDV()) );
     }
     return ss.str();
 }

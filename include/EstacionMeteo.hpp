@@ -13,12 +13,18 @@ class EstacionMeteo
         void termina();
         float getT();
         float getH();
+        float getVV();
+        float getVR();
+        unsigned getDV();
         unsigned getR();
         std::string getcurrent();
     private:
         float temp;
         float humi;
         int rain;
+        float vel_vent; // km/h
+        float vel_racha;// km/h
+        int dir_vent; //º sexagesimales
 
         std::thread * pth;
         void procesa();     //the working thread
