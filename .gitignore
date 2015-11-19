@@ -8,3 +8,6 @@ include/cereal/*
 docs/*.pdf
 docs/*.bak
 docs/*.htm*
+docs/*.svg
+Arduino/Ajuste-veleta
+

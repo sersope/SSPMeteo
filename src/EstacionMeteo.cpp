@@ -43,7 +43,8 @@ bool EstacionMeteo::arranca()
     vel_vent = 0.0;
     vel_racha = 0.0;
     dir_vent = 0;
-    return ReceptorRF433::arranca();
+//////    return ReceptorRF433::arranca();
+return true;
 }
 
 void EstacionMeteo::termina()
@@ -96,7 +97,7 @@ void EstacionMeteo::procesa()
     }
 }
 
-float EstacionMeteo::getT()
+float EstacionMeteo::getT(char unit)
 {
     temp = ((ReceptorRF433::mensaje_tipo[0] & 0xFFFF) - 300.0) / 10.0;
     return temp;
@@ -108,19 +109,19 @@ float EstacionMeteo::getH()
     return humi;
 }
 
-unsigned EstacionMeteo::getR()
+unsigned EstacionMeteo::getR(char unit)
 {
     rain = ReceptorRF433::mensaje_tipo[2] & 0xFFFF;
     return rain;
 }
 
-float EstacionMeteo::getVV()
+float EstacionMeteo::getVV(char unit)
 {
     vel_vent = (ReceptorRF433::mensaje_tipo[3] & 0xFFFF) / 10.0;
     return vel_vent;
 }
 
-float EstacionMeteo::getVR()
+float EstacionMeteo::getVR(char unit)
 {
     vel_racha = (ReceptorRF433::mensaje_tipo[4] & 0xFFFF) / 10.0;
     return vel_racha;

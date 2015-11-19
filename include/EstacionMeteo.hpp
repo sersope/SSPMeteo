@@ -11,12 +11,12 @@ class EstacionMeteo
         ~EstacionMeteo();
         bool arranca();
         void termina();
-        float getT();
+        float getT(char unit='m');  // unit = 'm' sistema metrico unit = 'i' sistema imperial
         float getH();
-        float getVV();
-        float getVR();
+        float getVV(char unit='m');
+        float getVR(char unit='m');
         unsigned getDV();
-        unsigned getR();
+        unsigned getR(char unit='m');
         std::string getcurrent();
     private:
         float temp;

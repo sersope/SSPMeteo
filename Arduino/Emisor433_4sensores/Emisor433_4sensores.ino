@@ -33,7 +33,7 @@
 #define DHT22_PIN   4
 #define RF433_PIN   7
 #define VELETA_PIN  A0
-#define INTERVALO_LECTURA 8000 // en milisegundos
+#define INTERVALO_LECTURA 5000 // en milisegundos
 #define N_MENSAJES  6   // Número total de mensajes a transmitir
 
 // TRANSMISOR RF433
@@ -57,14 +57,14 @@ volatile unsigned long anemom_last = 0UL;    // the last time the output pin was
 volatile unsigned long anemom_min=0xffffffff;  // Minimo tiempo de revolucion del anemometro en el intervalo de lectura
 
 // VELETA
-const int veletaVal[] = {66, 84, 92, 127, 184, 244, 287, 406, 461, 600, 631, 702, 786, 827, 889, 946};  // DETERMINAR EXPERIMENTALMENTE
-const word veletaDir[] = {112, 67, 90, 157, 135, 202, 180, 22, 45, 247, 225, 337, 0, 292, 315, 270};
+const int veletaVal[] = {75, 132, 191, 233, 314, 389, 418, 555, 610, 733, 777, 835, 895, 928, 937, 957};  // DETERMINAR EXPERIMENTALMENTE
+const word veletaDir[] = {270, 315, 292, 0, 337, 225, 247, 45, 22, 180, 202, 135, 157, 90, 67, 112};
 word dir_vent;  // Direccion del viento en grados sexagesimales. (0 - 359)
 
 // Callback para el contaje de lluvia
 void cuenta_lluvia()
 {
-  if ((millis() - lluvia_last) > 200)  // Fecuencia volteo balancin maxima = 1 / (debounce / 1000) (Con debounce = 200 son 5 volteos/seg. Imposible fisicamente, bien) 
+  if ((millis() - lluvia_last) > 100)  // Fecuencia volteo balancin maxima = 1 / (debounce / 1000) (Con debounce = 200 son 5 volteos/seg. Imposible fisicamente, bien) 
   {
     lluvia_ticks++;
   }
@@ -76,7 +76,7 @@ void cuenta_anemom()
 {
   long thisTime = millis() - anemom_last;
   anemom_last = millis();
-  if(thisTime > 5)  // Max.vel.anemom. = ANEMOM_FACTOR / (debounce / 1000) (con debounce = 5 son 480 km/h. Velocidad imposible del viento, bien)
+  if(thisTime > 10)  // Max.vel.anemom. = ANEMOM_FACTOR / (debounce / 1000) (con debounce = 10 son 240 km/h. Velocidad imposible del viento, bien)
   {
     anemom_ticks++;
     if(thisTime<anemom_min)
@@ -101,7 +101,7 @@ void leeDHT()
 }
 
 // Obten la velocidad del viento promedio en el intervalo de lectura
-// La velocidad de racha es la minima medida en el intervalo de lectura
+// La velocidad de racha es la minima medida en el intervalo de lectura entre dos ticks consecutivos
 // La funcion ha de ser llamada exactamente cada INTERVALO_LECTURA para exactitud en el calculo de la velocidad del viento
 void leeAnemom()
 {
@@ -114,26 +114,21 @@ void leeAnemom()
 
 void leeVeleta()
 {
-  unsigned int lectura = analogRead(VELETA_PIN);
-  unsigned int lastDif = 2048;
-  int i, dif;
+  int lectura = analogRead(VELETA_PIN);
+  
+  unsigned int minDif = 2048;
+  int i, min_i,dif;
  
   for (i = 0; i < 16; i++)
   {
      dif = abs(lectura - veletaVal[i]);
-     if(dif == 0)
+     if(dif < minDif)
      {
-       dir_vent = veletaDir[i];
-       return;
+       minDif = dif;
+       min_i = i;
      }
-     if(dif > lastDif)
-     {
-       dir_vent = veletaDir[i-1];
-       return;
-     }
-     lastDif = dif;
   }
-  dir_vent = veletaDir[15];
+  dir_vent = veletaDir[min_i];
 }
 
 void sendData()
@@ -143,7 +138,7 @@ void sendData()
   Serial.print("Lluv= "); Serial.println(lluvia_ticks);
   Serial.print("Vven= "); Serial.println(vel_vent);
   Serial.print("Vrac= "); Serial.println(vel_racha);
-  Serial.print("Vdir= "); Serial.println(dir_vent);
+  Serial.print("Dven= "); Serial.println(dir_vent);
 }
 
 // Codifica los mensajes segun los valores a transmitir
@@ -175,15 +170,13 @@ void transmite()
   }
   digitalWrite(13,LOW);
 }
+
+unsigned long timer_lectura;
  
-
-unsigned long timer_loop;
-bool first_loop;
-
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("RF433 Weather Station.");
+  Serial.println("SSPMeteo.");
     
   // Para el conteo de lluvia
   pinMode(LLUVIA_PIN,INPUT_PULLUP);
@@ -201,27 +194,25 @@ void setup()
   rcswitch.enableTransmit(RF433_PIN);
   rcswitch.setRepeatTransmit(20);
   
-  first_loop = true;
-  timer_loop = millis();
+  // Primera vez
+  timer_lectura = millis();
+  leeAnemom();
+  leeVeleta();
+  leeDHT();
+  sendData();
+  //transmite();
 }
-
 
 void loop()
 {
-  if ( first_loop || ((millis() - timer_loop) >= INTERVALO_LECTURA))
+  if ((millis() - timer_lectura) >= INTERVALO_LECTURA)
   {
     leeAnemom();
     leeVeleta();
     leeDHT();
-        
-    // Envia por Serial para pruebas
     sendData();
-  
-    // Codifica y envia por RF
-    transmite();
-    
-    first_loop = false;
-    timer_loop += INTERVALO_LECTURA;
+    //transmite();
+    timer_lectura += INTERVALO_LECTURA;
   }
 }
 
