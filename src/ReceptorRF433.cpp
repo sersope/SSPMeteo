@@ -1,11 +1,11 @@
 #include "ReceptorRF433.hpp"
 #include <iostream>
-//unsigned long ReceptorRF433::nReceivedValue = 0;
-//unsigned int ReceptorRF433::nReceivedBitlength = 0;
-//unsigned int ReceptorRF433::nReceivedDelay = 0;
-//unsigned int ReceptorRF433::nReceivedProtocol = 0;
+
 unsigned int ReceptorRF433::timings[ReceptorRF433::PACKET_MAX_CHANGES]{};
-unsigned int ReceptorRF433::mensaje_tipo[ReceptorRF433::N_MENSAJES]{};
+unsigned int ReceptorRF433::mensaje_tipo[ReceptorRF433::N_MENSAJES][REPETIDOS]{};
+int ReceptorRF433::last_mensa = 0;
+int ReceptorRF433::mensajes_recibidos = 0;
+int ReceptorRF433::mensaje_indice[ReceptorRF433::N_MENSAJES]{};
 
 bool ReceptorRF433::arranca()
 {
@@ -14,6 +14,7 @@ bool ReceptorRF433::arranca()
     else
     {
         wiringPiISR(RF_PIN, INT_EDGE_BOTH, &handleInterrupt);
+        reseteaArraysMensajes();
         return true;
     }
 }
@@ -82,18 +83,27 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         }
     }
     code = code >> 1;
-    if (changeCount/2 == 24)      // considera solo mensajes de 24 bits
+    if (changeCount/2 == 24)      // considera solo mensajes de 24 bits (1er. filtro )
     {
-//        ReceptorRF433::nReceivedValue = code;
-//        ReceptorRF433::nReceivedBitlength = changeCount / 2;
-//        ReceptorRF433::nReceivedDelay = delay;
-//        ReceptorRF433::nReceivedProtocol = 1;
-        // Según el tipo de mensaje asigna al array de mensajes.
+        // Cada tipo de mensaje (de 1 a "N_MENSAJES") se recibe un nº de veces.
+        // Los mensajes se almacenan en el array de 2 dimensiones "mensaje_tipo" ordenados por el tipo de mensaje
+        // El nº de veces que se recibe cada tipo de mensaje se almacena en el array "mensaje_indice"
         int n = (code & 0xFF0000) >> 16; //Nº del mensaje
         if (n >= 1 && n <= N_MENSAJES)
         {
-           mensaje_tipo[n-1] = code;
-//           std::cout << n << "-" << changeCount / 2 << " ";    // Muestra el nº de mensajes del mismo tipo y su longitud
+            int m = n-1; //Es el indice para los arrays;
+
+            // Comienzo de una nueva transmision. Suponemos siempre por lo menos un mensaje 1 valido :)
+            // Si no llega ningun mensaje 1 reseteamos cuando se alcance el máximo nº de mensajes esperados.
+            if( (m == 0 && m != last_mensa) || mensajes_recibidos >= (N_MENSAJES * REPETIDOS) )
+                reseteaArraysMensajes();
+
+            if( mensaje_indice[m] >= REPETIDOS )
+                mensaje_indice[m] = REPETIDOS - 1; // Evita overflow del array
+            mensaje_tipo[m][mensaje_indice[m]] = code;
+            mensaje_indice[m]++;
+            mensajes_recibidos++;
+            last_mensa = m;
         }
     }
     if (code == 0)
@@ -102,3 +112,15 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         return true;
 }
 
+void ReceptorRF433::reseteaArraysMensajes()
+{
+    int fila, columna;
+
+    for(fila = 0; fila < N_MENSAJES; fila++)
+    {
+        mensaje_indice[fila] = 0;
+        for(columna = 0; columna < REPETIDOS ; columna++)
+            mensaje_tipo[fila][columna] = 99999; // Para distinguir si el mensaje se ocupa
+    }
+    mensajes_recibidos = 0;
+}

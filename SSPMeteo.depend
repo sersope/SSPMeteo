@@ -47,23 +47,31 @@
 1443026921 source:/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 
-1444248372 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
+1448639210 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 	"ReceptorRF433.hpp"
+	<sstream>
+	<cereal/archives/json.hpp>
+	<cereal/types/vector.hpp>
+	<ctime>
+	<thread>
+	<Anotador.hpp>
 
-1444248372 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+	<string>
+	<thread>
 
 1443026921 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/RCSwitch.h
 	"Arduino.h"
 	<wiringPi.h>
 	<stdint.h>
 
-1444385546 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
-	<fstream>
+1448639210 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/main.cpp
 	<iostream>
-	<wiringPi.h>
+	<string>
 	"EstacionMeteo.hpp"
 	"SocketServer.hpp"
+	"Anotador.hpp"
 
 1443026921 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/RCSwitch.cpp
 	"RCSwitch.h"
@@ -95,27 +103,28 @@
 1444197866 source:/home/sergio/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
 
-1444383559 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
+1449139959 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
 	<iostream>
 
-1444381769 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
 	<wiringPi.h>
 
-1444385457 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/SocketServer.cpp
+1448639210 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/SocketServer.cpp
 	"SocketServer.hpp"
-
-1444385457 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/SocketServer.hpp
 	<unistd.h>
-	<iostream>
 	<cstring>
 	<sys/socket.h>
 	<netdb.h>
 	<sys/select.h>
+	<chrono>
+
+1448639210 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/SocketServer.hpp
 	<list>
 	<thread>
 	<string>
 	"EstacionMeteo.hpp"
+	"Anotador.hpp"
 
 1444211974 /home/sergio/dev/SSPMeteo/include/SocketServer.hpp
 	<unistd.h>
@@ -131,7 +140,7 @@
 1444213486 source:/home/sergio/dev/SSPMeteo/src/SocketServer.cpp
 	"SocketServer.hpp"
 
-1445582521 source:/home/sergio/GDRIVE/dev/C++/SSPMeteo/src/EstacionMeteo.cpp
+1448277906 source:/home/sergio/GDRIVE/dev/C++/SSPMeteo/src/EstacionMeteo.cpp
 	"EstacionMeteo.hpp"
 	"ReceptorRF433.hpp"
 	<sstream>
@@ -141,11 +150,11 @@
 	<thread>
 	<Anotador.hpp>
 
-1446044576 /home/sergio/GDRIVE/dev/C++/SSPMeteo/include/EstacionMeteo.hpp
+1446814547 /home/sergio/GDRIVE/dev/C++/SSPMeteo/include/EstacionMeteo.hpp
 	<string>
 	<thread>
 
-1446044007 /home/sergio/GDRIVE/dev/C++/SSPMeteo/include/ReceptorRF433.hpp
+1448277321 /home/sergio/GDRIVE/dev/C++/SSPMeteo/include/ReceptorRF433.hpp
 	<wiringPi.h>
 
 1444384160 /home/sergio/GDRIVE/dev/C++/SSPMeteo/include/cereal/archives/json.hpp
@@ -267,7 +276,7 @@
 	<cereal/cereal.hpp>
 	<vector>
 
-1445277331 source:/home/sergio/GDRIVE/dev/C++/SSPMeteo/src/ReceptorRF433.cpp
+1448277936 source:/home/sergio/GDRIVE/dev/C++/SSPMeteo/src/ReceptorRF433.cpp
 	"ReceptorRF433.hpp"
 	<iostream>
 
@@ -298,6 +307,177 @@
 	<string>
 
 1445514471 source:/home/sergio/GDRIVE/dev/C++/SSPMeteo/src/Anotador.cpp
+	"Anotador.hpp"
+	<fstream>
+	<locale>
+	<ctime>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/archives/json.hpp
+	<cereal/cereal.hpp>
+	<cereal/details/util.hpp>
+	<cereal/external/rapidjson/prettywriter.h>
+	<cereal/external/rapidjson/genericstream.h>
+	<cereal/external/rapidjson/reader.h>
+	<cereal/external/rapidjson/document.h>
+	<cereal/external/base64.hpp>
+	<limits>
+	<sstream>
+	<stack>
+	<vector>
+	<string>
+
+1448639210 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/cereal.hpp
+	<type_traits>
+	<string>
+	<memory>
+	<unordered_map>
+	<unordered_set>
+	<vector>
+	<cstddef>
+	<cstdint>
+	<functional>
+	<cereal/macros.hpp>
+	<cereal/details/traits.hpp>
+	<cereal/details/helpers.hpp>
+	<cereal/types/base_class.hpp>
+	<cereal/types/common.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/macros.hpp
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/details/traits.hpp
+	<type_traits>
+	<typeindex>
+	<cereal/macros.hpp>
+	<cereal/access.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/access.hpp
+	<type_traits>
+	<iostream>
+	<cstdint>
+	<cereal/macros.hpp>
+	<cereal/details/helpers.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/details/helpers.hpp
+	<type_traits>
+	<cstdint>
+	<utility>
+	<memory>
+	<unordered_map>
+	<stdexcept>
+	<cereal/macros.hpp>
+	<cereal/details/static_object.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/details/static_object.hpp
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/types/base_class.hpp
+	<cereal/details/traits.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/types/common.hpp
+	<cereal/cereal.hpp>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/details/util.hpp
+	<typeinfo>
+	<string>
+	<cxxabi.h>
+	<cstdlib>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/prettywriter.h
+	"writer.h"
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/writer.h
+	"rapidjson.h"
+	"internal/stack.h"
+	"internal/strfunc.h"
+	<cstdio>
+	<new>
+	<limits>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/rapidjson.h
+	<cstdlib>
+	<cstring>
+	<inttypes.h>
+	<cassert>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/internal/stack.h
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/internal/strfunc.h
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/genericstream.h
+	"rapidjson.h"
+	<iostream>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/reader.h
+	"rapidjson.h"
+	"internal/pow10.h"
+	"internal/stack.h"
+	<csetjmp>
+	<limits>
+	<cmath>
+	<sstream>
+	<nmmintrin.h>
+	<emmintrin.h>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/internal/pow10.h
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/rapidjson/document.h
+	"reader.h"
+	"internal/strfunc.h"
+	<new>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/external/base64.hpp
+	<string>
+
+1448639209 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/cereal/types/vector.hpp
+	<cereal/cereal.hpp>
+	<vector>
+
+1448639210 /run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/include/Anotador.hpp
+	<string>
+
+1448639210 source:/run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/src/Anotador.cpp
+	"Anotador.hpp"
+	<fstream>
+	<locale>
+	<ctime>
+
+1448639210 /run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/include/Anotador.hpp
+	<string>
+
+1448639210 source:/run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/src/main.cpp
+	<iostream>
+	<string>
+	"EstacionMeteo.hpp"
+	"SocketServer.hpp"
+	"Anotador.hpp"
+
+1448639209 /run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/include/EstacionMeteo.hpp
+	<string>
+	<thread>
+
+1448639210 /run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/include/SocketServer.hpp
+	<list>
+	<thread>
+	<string>
+	"EstacionMeteo.hpp"
+	"Anotador.hpp"
+
+1448639210 source:/run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/src/ReceptorRF433.cpp
+	"ReceptorRF433.hpp"
+	<iostream>
+
+1448639209 /run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/include/ReceptorRF433.hpp
+	<wiringPi.h>
+
+1448639210 source:/run/user/1000/gvfs/sftp:host=84.126.168.72,port=80/home/pi/dev/SSPMeteo/src/SocketServer.cpp
+	"SocketServer.hpp"
+	<unistd.h>
+	<cstring>
+	<sys/socket.h>
+	<netdb.h>
+	<sys/select.h>
+	<chrono>
+
+1448639210 source:/run/user/1000/gvfs/sftp:host=192.168.1.20,user=pi/home/pi/dev/SSPMeteo/src/Anotador.cpp
 	"Anotador.hpp"
 	<fstream>
 	<locale>

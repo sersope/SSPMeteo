@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/sspmeteo
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/src/EstacionMeteo.o $(OBJDIR_DEBUG)/src/ReceptorRF433.o $(OBJDIR_DEBUG)/src/SocketServer.o $(OBJDIR_DEBUG)/src/main.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/src/Anotador.o $(OBJDIR_DEBUG)/src/EstacionMeteo.o $(OBJDIR_DEBUG)/src/ReceptorRF433.o $(OBJDIR_DEBUG)/src/SocketServer.o $(OBJDIR_DEBUG)/src/main.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/src/EstacionMeteo.o $(OBJDIR_RELEASE)/src/ReceptorRF433.o $(OBJDIR_RELEASE)/src/SocketServer.o $(OBJDIR_RELEASE)/src/main.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/src/Anotador.o $(OBJDIR_RELEASE)/src/EstacionMeteo.o $(OBJDIR_RELEASE)/src/ReceptorRF433.o $(OBJDIR_RELEASE)/src/SocketServer.o $(OBJDIR_RELEASE)/src/main.o
 
 all: debug release
 
@@ -58,6 +58,9 @@ debug: before_debug out_debug after_debug
 
 out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
 	$(LD) $(LIBDIR_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG)  $(LDFLAGS_DEBUG) $(LIB_DEBUG)
+
+$(OBJDIR_DEBUG)/src/Anotador.o: src/Anotador.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/Anotador.cpp -o $(OBJDIR_DEBUG)/src/Anotador.o
 
 $(OBJDIR_DEBUG)/src/EstacionMeteo.o: src/EstacionMeteo.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/EstacionMeteo.cpp -o $(OBJDIR_DEBUG)/src/EstacionMeteo.o
@@ -86,6 +89,9 @@ release: before_release out_release after_release
 
 out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
 	$(LD) $(LIBDIR_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE)  $(LDFLAGS_RELEASE) $(LIB_RELEASE)
+
+$(OBJDIR_RELEASE)/src/Anotador.o: src/Anotador.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/Anotador.cpp -o $(OBJDIR_RELEASE)/src/Anotador.o
 
 $(OBJDIR_RELEASE)/src/EstacionMeteo.o: src/EstacionMeteo.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/EstacionMeteo.cpp -o $(OBJDIR_RELEASE)/src/EstacionMeteo.o

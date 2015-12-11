@@ -17,7 +17,7 @@ void Anotador::anota(const std::string & texto, char t)
 {
     std::ofstream file(fname, std::ofstream::app);
 
-    file << str_ahora(t) << " - " << texto << std::endl;
+    file << str_ahora(t) << "," << texto << std::endl;
     file.close();
 }
 
@@ -33,6 +33,6 @@ std::string Anotador::str_ahora(char t)
         timeinfo = gmtime(&rawtime);
     else
         timeinfo = localtime(&rawtime);
-    strftime(buffer,25, "%F %T", timeinfo);
+    strftime(buffer,25, "%F,%T", timeinfo);
     return std::string(buffer);
 }

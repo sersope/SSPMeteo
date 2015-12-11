@@ -2,17 +2,17 @@
     La clase ReceptorRF433 recibe los mensajes del modulo RF-Receiver conectado a la entrada
     RF_PIN de las gpios de la Raspberry.
     Los mensajes tienen 24 bits de longitud, los dos bytes menos significativos contienen el
-    cuerpo del mensaje. El byte siguiente contiene un número de 1 a N_MENSAJES indicando el
+    cuerpo del mensaje. El byte siguiente contiene un nÃºmero de 1 a N_MENSAJES indicando el
     tipo de mensaje.
-    Los clientes deben llamar a la función arranca() para iniciar la recepción.
-    Los mensajes se depositan en mensaje_tipo[] según su tipo. mensaje_tipo[] contiene el último
+    Los clientes deben llamar a la funciÃ³n arranca() para iniciar la recepciÃ³n.
+    Los mensajes se depositan en mensaje_tipo[] segÃºn su tipo. mensaje_tipo[] contiene el Ãºltimo
     mensaje recibido de cada tipo.
 
-    ReceptorRF433 es una clase static pura y no se necesita ninguna instanciación.
+    ReceptorRF433 es una clase static pura y no se necesita ninguna instanciaciÃ³n.
 
-    Se usa parte del código de la clase RCSwitch:
+    Se usa parte del cÃ³digo de la clase RCSwitch:
             RCSwitch - Arduino libary for remote control outlet switches
-            Copyright (c) 2011 Suat Özgür.  All right reserved.
+            Copyright (c) 2011 Suat Ã–zgÃ¼r.  All right reserved.
 
             Contributors:
             - Andre Koehler / info(at)tomate-online(dot)de
@@ -32,22 +32,22 @@
 class ReceptorRF433
 {
   private:
-	static const int RECEIVE_TOLERANCE = 60;
-	static const int PACKET_MAX_CHANGES = 67;
+    static const int RECEIVE_TOLERANCE = 60;
+    static const int PACKET_MAX_CHANGES = 67;
     static const int RF_PIN = 2;
-    static const int N_MENSAJES = 6;   // Número total de mensajes
+    static const int N_MENSAJES = 6;   // NÃºmero total de mensajes
+    static const int REPETIDOS = 9;   //  Repeticon de cada mensaje tipo
 
-//  static unsigned long nReceivedValue;        // Aqui está el mensaje recibido o es 0
-//    static unsigned int nReceivedBitlength;     // Valor solo informativo
-//	static unsigned int nReceivedDelay;         // Valor solo informativo
-//	static unsigned int nReceivedProtocol;      // Valor solo informativo
     static unsigned int timings[PACKET_MAX_CHANGES];
 
     static void handleInterrupt();
-	static bool receiveProtocol1(unsigned int changeCount);
-
+    static void reseteaArraysMensajes();
+    static bool receiveProtocol1(unsigned int changeCount);
+    static int last_mensa;
   public:
-    static unsigned mensaje_tipo[N_MENSAJES];
+    static int mensaje_indice[N_MENSAJES]; //Contiene la cantidad de mensajes recibidos de cada tipo en cada transmision
+    static int mensajes_recibidos; // Contiene el nÂº total de mensajes recibidos en cada transmision
+    static unsigned mensaje_tipo[N_MENSAJES][REPETIDOS]; //Contiene todos los mensajes recibidos en cada transmision
     static bool arranca();
 
 };
