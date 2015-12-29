@@ -21,7 +21,6 @@
     mensaje6: unsigned long. 32 bits
         0000000000000110rrrrrrrrrrrrrrrr -> direccion del viento
 */
-// TODO: Filtrar lo valores por sus limites fisicos
 
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
@@ -95,7 +94,6 @@ void EstacionMeteo::procesa()
         hoy = localtime(&ahora)->tm_mday;
         if(difftime(ahora,timer_lectura) >= periodo_lectura)
         {
-            // TODO: Leer datos actuales.
             // Actualizar datos diarios
             log.anota(getcurrent());
                     // PRUEBAS
@@ -146,55 +144,73 @@ void EstacionMeteo::procesa()
 
 float EstacionMeteo::getT(char unit)
 {
-    float aux;
-    aux = ((ReceptorRF433::mensaje_tipo[0][0] & 0xFFFF) - 300.0) / 10.0;
-    if( aux >= -30.0 && aux <= 70.0 )
-        temp = aux;
+    if( esMensajeBueno(0) )
+    {
+        float aux;
+        aux = ((ReceptorRF433::mensaje_tipo[0][0] & 0xFFFF) - 300.0) / 10.0;
+        if( aux >= -30.0 && aux <= 70.0 )
+            temp = aux;
+    }
     return temp;
 }
 
 float EstacionMeteo::getH()
 {
-    float aux;
-    aux = (ReceptorRF433::mensaje_tipo[1][0] & 0xFFFF) / 10.0;
-    if( aux >= 0.0 && aux <= 100.0 )
-        humi = aux;
+    if( esMensajeBueno(1) )
+    {
+        float aux;
+        aux = (ReceptorRF433::mensaje_tipo[1][0] & 0xFFFF) / 10.0;
+        if( aux >= 0.0 && aux <= 100.0 )
+            humi = aux;
+    }
     return humi;
 }
 
 unsigned EstacionMeteo::getR(char unit)
 {
-    int aux;
-    aux = ReceptorRF433::mensaje_tipo[2][0] & 0xFFFF;
-    if( aux >= 0 && aux <= 65535 )
-        rain = aux;
+    if( esMensajeBueno(2) )
+    {
+        int aux;
+        aux = ReceptorRF433::mensaje_tipo[2][0] & 0xFFFF;
+        if( aux >= 0 && aux <= 65535 )
+            rain = aux;
+    }
     return rain;
 }
 
 float EstacionMeteo::getVV(char unit)
 {
-    float aux;
-    aux = (ReceptorRF433::mensaje_tipo[3][0] & 0xFFFF) / 10.0;
-    if( aux >= 0.0 && aux <= 160.0 )
-        vel_vent = aux;
+    if( esMensajeBueno(3) )
+    {
+        float aux;
+        aux = (ReceptorRF433::mensaje_tipo[3][0] & 0xFFFF) / 10.0;
+        if( aux >= 0.0 && aux <= 160.0 )
+            vel_vent = aux;
+    }
     return vel_vent;
 }
 
 float EstacionMeteo::getVR(char unit)
 {
-    float aux;
-    aux = (ReceptorRF433::mensaje_tipo[4][0] & 0xFFFF) / 10.0;
-    if( aux >= 0.0 && aux <= 160.0 )
-        vel_racha = aux;
+    if( esMensajeBueno(4) )
+    {
+        float aux;
+        aux = (ReceptorRF433::mensaje_tipo[4][0] & 0xFFFF) / 10.0;
+        if( aux >= 0.0 && aux <= 160.0 )
+            vel_racha = aux;
+    }
     return vel_racha;
 }
 
 unsigned EstacionMeteo::getDV()
 {
-    int aux;
-    aux = ReceptorRF433::mensaje_tipo[5][0] & 0xFFFF;
-    if( aux >= 0 && aux < 360 )
-        dir_vent = aux;
+    if( esMensajeBueno(5) )
+    {
+        int aux;
+        aux = ReceptorRF433::mensaje_tipo[5][0] & 0xFFFF;
+        if( aux >= 0 && aux < 360 )
+            dir_vent = aux;
+    }
     return dir_vent;
 }
 
@@ -205,4 +221,20 @@ std::string EstacionMeteo::getcurrent()
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
     return ss.str();
+}
+
+// Filtrado de mensajes recibidos.
+// Por lo menos tres mensajes y todos iguales
+bool EstacionMeteo::esMensajeBueno(int nmen)
+{
+    int n = ReceptorRF433::mensaje_indice[nmen];
+
+    if( n < 3)
+        return false;
+
+    unsigned valor = ReceptorRF433::mensaje_tipo[nmen][0];
+    for(int i = 0; i < n; i++)
+        if( ReceptorRF433::mensaje_tipo[nmen][i] != valor)
+            return false;
+    return true;
 }

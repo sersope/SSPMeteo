@@ -28,6 +28,7 @@ class EstacionMeteo
 
         std::thread * pth;
         void procesa();     //the working thread
+        bool esMensajeBueno(int nmen);
         bool terminar;
 };
 #endif // __ESTACION__METEO__HPP
