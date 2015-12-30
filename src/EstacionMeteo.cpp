@@ -26,8 +26,6 @@
 #include "ReceptorRF433.hpp"
 
 #include <sstream>
-//#include <cereal/archives/json.hpp>
-//#include <cereal/types/vector.hpp>
 #include <ctime>
 #include <thread>
 #include <Anotador.hpp>
@@ -68,77 +66,55 @@ void EstacionMeteo::termina()
 
 void EstacionMeteo::procesa()
 {
-    Anotador log("EstacionMeteo.log");
-            // PRUEBAS
-            Anotador men1("Mensaje1.log");
-            Anotador men2("Mensaje2.log");
-            Anotador men3("Mensaje3.log");
-            Anotador men4("Mensaje4.log");
-            Anotador men5("Mensaje5.log");
-            Anotador men6("Mensaje6.log");
-            int i = 0;
-            // FIN PRUEBAS
-
-    double periodo_lectura = 30.0;          // segundos
-    double periodo_salvadatos = 15 * 60.0;  // segundos
+    Anotador datos_log("datos.dat");
+    double periodo_lectura = 60.0;          // segundos
+    double periodo_salvadatos = 1 * 60.0;  // segundos
     time_t timer_lectura,timer_salvadatos,ahora;
     time(&ahora);
     timer_lectura = ahora;
     timer_salvadatos = ahora;
     int hoy = localtime(&ahora)->tm_mday;
+    int mes = localtime(&ahora)->tm_mon + 1;
+    int anyo = localtime(&ahora)->tm_year + 1900;
     int ayer = hoy;
+
+    //Genera el nombre del fichero de datos diarios
+    std::stringstream nomfile;
+    nomfile.str("");
+    nomfile << anyo << "-" << mes << "-" << hoy << ".dat";
+    datos_log.setName(nomfile.str());
 
     while(!terminar)
     {
         time(&ahora);
         hoy = localtime(&ahora)->tm_mday;
+
+        // Por cambio de dia
+        if(hoy != ayer)
+        {
+            // Cambio de dia.
+            // Obten nuevo nombre para el fichero de datos diarios
+            mes = localtime(&ahora)->tm_mon + 1;
+            anyo = localtime(&ahora)->tm_year + 1900;
+            nomfile.str("");
+            nomfile << anyo << "-" << mes << "-" << hoy << ".dat";
+            datos_log.setName(nomfile.str());
+
+            ayer = hoy;
+        }
         if(difftime(ahora,timer_lectura) >= periodo_lectura)
         {
-            // Actualizar datos diarios
-            log.anota(getcurrent());
-                    // PRUEBAS
-                    std::stringstream s1,s2,s3,s4,s5,s6;
-                    for(i = 0; i < 9 ; i++)
-                        s1 << ReceptorRF433::mensaje_tipo[0][i] << ",";
-                    men1.anota(s1.str());
-
-                    for(i = 0; i < 9 ; i++)
-                        s2 << ReceptorRF433::mensaje_tipo[1][i] << ",";
-                    men2.anota(s2.str());
-
-                    for(i = 0; i < 9 ; i++)
-                        s3 << ReceptorRF433::mensaje_tipo[2][i] << ",";
-                    men3.anota(s3.str());
-
-                    for(i = 0; i < 9 ; i++)
-                        s4 << ReceptorRF433::mensaje_tipo[3][i] << ",";
-                    men4.anota(s4.str());
-
-                    for(i = 0; i < 9 ; i++)
-                        s5 << ReceptorRF433::mensaje_tipo[4][i] << ",";
-                    men5.anota(s5.str());
-
-                    for(i = 0; i < 9 ; i++)
-                        s6 << ReceptorRF433::mensaje_tipo[5][i] << ",";
-                    men6.anota(s6.str());
-                    // FIN PRUEBAS
+            // TODO (sergio#1#30/12/15): Añadir envio a weather underground
             timer_lectura = ahora;
         }
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
         {
             // Salva datos actuales
-            log.anota("Salvado de datos");
+            datos_log.anota(getcurrent());
+
             timer_salvadatos = ahora;
         }
-        if(hoy != ayer)
-        {
-            // Cambio de dia.
-            // Salvar datos diarios
-            // Resetear datos diarios
-            log.anota("Cambio de dia");
-            ayer = hoy;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 

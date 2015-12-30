@@ -13,6 +13,11 @@ Anotador::Anotador(const std::string & fname)
     this->fname = fname;
 }
 
+void Anotador::setName(const std::string & fname)
+{
+    this->fname = fname;
+}
+
 void Anotador::anota(const std::string & texto, char t)
 {
     std::ofstream file(fname, std::ofstream::app);
