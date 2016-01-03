@@ -29,9 +29,19 @@
 #include <ctime>
 #include <thread>
 #include <Anotador.hpp>
+#include <curl/curl.h>
+#include <math.h>
 
 EstacionMeteo::EstacionMeteo()
 {
+    temp = -70.0;
+    humi = 0.0;
+    rain = 0;
+    rain_init = 0;
+    vel_vent = 0.0;
+    vel_racha = 0.0;
+    dir_vent = 0;
+
     pth = 0;
 }
 
@@ -45,12 +55,6 @@ bool EstacionMeteo::arranca()
     terminar = false;
     pth = new std::thread(&EstacionMeteo::procesa, this);
 
-    temp = -70.0;
-    humi = 0.0;
-    rain = 0;
-    vel_vent = 0.0;
-    vel_racha = 0.0;
-    dir_vent = 0;
     return ReceptorRF433::arranca();
     //return true;
 }
@@ -67,17 +71,33 @@ void EstacionMeteo::termina()
 void EstacionMeteo::procesa()
 {
     Anotador datos_log("datos.dat");
-    double periodo_lectura = 60.0;          // segundos
-    double periodo_salvadatos = 1 * 60.0;  // segundos
-    time_t timer_lectura,timer_salvadatos,ahora;
+    Anotador log("estacionMeteo.log");
+    double un_minuto = 1 * 60.0;                // segundos
+    double periodo_salvadatos = 1 * 60.0;      // segundos// NOTE (sergio#1#03/01/16): Para pruebas ponemos 1 minuto, luego ya se verá
+    time_t timer_un_minuto,timer_salvadatos,ahora;
+    bool datosOK = false;
+    // Espera a que lleguen datos validos por primera vez
+    log.anota("Esperando datos válidos...");
+    while(!datosOK)
+    {
+        for( int i = 0; i < 6; i++)
+            if( esMensajeBueno(i))
+                datosOK = true;
+            else
+                datosOK = false;
+    }
+    log.anota("Datos válidos OK.");
+    // Inicializacion de lluvia
+    rain_init = getR();
+    rain_cola.push(rain_init);
+    // Inicializacion de tiempos
     time(&ahora);
-    timer_lectura = ahora;
+    timer_un_minuto = ahora;
     timer_salvadatos = ahora;
     int hoy = localtime(&ahora)->tm_mday;
     int mes = localtime(&ahora)->tm_mon + 1;
     int anyo = localtime(&ahora)->tm_year + 1900;
     int ayer = hoy;
-
     //Genera el nombre del fichero de datos diarios
     std::stringstream nomfile;
     nomfile.str("");
@@ -93,19 +113,25 @@ void EstacionMeteo::procesa()
         if(hoy != ayer)
         {
             // Cambio de dia.
+
             // Obten nuevo nombre para el fichero de datos diarios
             mes = localtime(&ahora)->tm_mon + 1;
             anyo = localtime(&ahora)->tm_year + 1900;
             nomfile.str("");
             nomfile << anyo << "-" << mes << "-" << hoy << ".dat";
             datos_log.setName(nomfile.str());
+            // Resetea la lluvia diaria
+            rain_init = getR();
 
             ayer = hoy;
         }
-        if(difftime(ahora,timer_lectura) >= periodo_lectura)
+        if(difftime(ahora,timer_un_minuto) >= un_minuto)
         {
-            // TODO (sergio#1#30/12/15): Añadir envio a weather underground
-            timer_lectura = ahora;
+            actualizaRH(); // Llamar cada minuto
+            // Envio a weather underground
+            uploadWunder();
+
+            timer_un_minuto = ahora;
         }
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
         {
@@ -127,7 +153,10 @@ float EstacionMeteo::getT(char unit)
         if( aux >= -30.0 && aux <= 70.0 )
             temp = aux;
     }
-    return temp;
+    if( unit == 'F')
+        return (1.8 * temp + 32); // Convierte a ºF
+    else
+        return temp;
 }
 
 float EstacionMeteo::getH()
@@ -142,16 +171,53 @@ float EstacionMeteo::getH()
     return humi;
 }
 
-unsigned EstacionMeteo::getR(char unit)
+float EstacionMeteo::getTR(char unit)
+{
+    trocio = pow(humi / 100.0, 1.0 / 8.0) * (112.0 + 0.9 * temp) + 0.1 * temp - 112.0;
+    if( unit == 'F' )
+        return (1.8 * trocio + 32);
+    else
+        return trocio;
+}
+
+float EstacionMeteo::getR(char unit)
 {
     if( esMensajeBueno(2) )
     {
-        int aux;
+        unsigned aux;
         aux = ReceptorRF433::mensaje_tipo[2][0] & 0xFFFF;
         if( aux >= 0 && aux <= 65535 )
-            rain = aux;
+            rain = aux * 0.138; // Factor mm/tick del pluviometro
     }
-    return rain;
+    if( unit == 'I')
+        return (rain / 25.4);
+    else
+        return rain;
+}
+
+float EstacionMeteo::getRD(char unit)
+{
+    rain_dia = getR() - rain_init;
+    if( unit == 'I')
+        return (rain_dia / 25.4 ); // A pulgadas
+    else
+        return rain_dia;
+}
+
+void EstacionMeteo::actualizaRH()
+{
+    rain_cola.push(getR());
+    rain_hora = rain_cola.back() - rain_cola.front();
+    if(rain_cola.size() > 60) // 1 hora = 60 minutos. La funcion se ha de llamar cada minuto (necesario)
+        rain_cola.pop();
+}
+
+float EstacionMeteo::getRH(char unit)
+{
+    if( unit == 'I')
+        return (rain_hora / 25.4);
+    else
+        return rain_hora;
 }
 
 float EstacionMeteo::getVV(char unit)
@@ -163,7 +229,10 @@ float EstacionMeteo::getVV(char unit)
         if( aux >= 0.0 && aux <= 160.0 )
             vel_vent = aux;
     }
-    return vel_vent;
+    if( unit == 'M')
+        return  (vel_vent * 0.621371192); // A mph
+    else
+        return vel_vent;
 }
 
 float EstacionMeteo::getVR(char unit)
@@ -175,7 +244,10 @@ float EstacionMeteo::getVR(char unit)
         if( aux >= 0.0 && aux <= 160.0 )
             vel_racha = aux;
     }
-    return vel_racha;
+    if( unit == 'M')
+        return (vel_racha * 0.621371192); // A mph
+    else
+        return vel_racha;
 }
 
 unsigned EstacionMeteo::getDV()
@@ -197,6 +269,48 @@ std::string EstacionMeteo::getcurrent()
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
     return ss.str();
+}
+
+bool EstacionMeteo::uploadWunder()
+{
+    CURL *curl;
+    CURLcode res;
+    char postfield[255];
+    Anotador log("wunder.log");
+
+    /* In windows, this will init the winsock stuff */
+    curl_global_init(CURL_GLOBAL_ALL);
+
+    /* get a curl handle */
+    curl = curl_easy_init();
+    if(curl)
+    {
+
+        /* First set the URL that is about to receive our POST. This URL can
+           just as well be a https:// URL if that is what should receive the
+           data. */
+        curl_easy_setopt(curl, CURLOPT_URL, "http://weatherstation.wunderground.com/weatherstation/updateweatherstation.php");
+
+        // Rellenamos los datos a enviar
+        sprintf(postfield,
+            "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d",
+            getT('F'), getH(), getTR('F'), getRD('I'), getRH(), getVV('M'), getVR('M'), getDV());
+        /* Now specify the POST data */
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
+        log.anota(postfield);
+        /* Perform the request, res will get the return code */
+        res = curl_easy_perform(curl);
+        /* Check for errors */
+        if(res != CURLE_OK)
+            log.anota("ERROR 1 en EstacionMeteo::uploadWunder.");
+
+        /* always cleanup */
+        curl_easy_cleanup(curl);
+    }
+    else
+        log.anota("ERROR 2 en EstacionMeteo::uploadWunder.");
+    curl_global_cleanup();
+    return true;
 }
 
 // Filtrado de mensajes recibidos.

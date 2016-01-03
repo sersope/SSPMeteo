@@ -29,7 +29,7 @@ while tecla != ord('q') and tecla != ord('Q'):
             l=[float(x) for x in d.split(',')]
             pantalla.addstr( 4, 1, 'Temperatura = {:5.1f} C'.format(l[0]))
             pantalla.addstr( 5, 1, 'Humedad     = {:5.1f} %'.format(l[1]))
-            pantalla.addstr( 6, 1, 'Lluvia      = {:5.1f} mm ({:5.0f})'.format(0.138 * l[2], l[2])) # 0.138 mm/tick
+            pantalla.addstr( 6, 1, 'Lluvia      = {:5.1f} mm ({:5.0f})'.format(l[2], l[2] / 0.138)) # 0.138 mm/tick
             pantalla.addstr( 7, 1, 'Vel. viento = {:5.1f} km/h'.format(l[3]))
             pantalla.addstr( 8, 1, 'Vel. racha  = {:5.1f} km/h'.format(l[4]))
             pantalla.addstr( 9, 1, 'Dir. viento = {:5.0f} grados'.format(l[5]))

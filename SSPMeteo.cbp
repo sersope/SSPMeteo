@@ -43,6 +43,7 @@ Use wiringPi library.]]>
 		<Linker>
 			<Add option="-pthread" />
 			<Add library="wiringPi" />
+			<Add library="curl" />
 		</Linker>
 		<Unit filename="include/Anotador.hpp" />
 		<Unit filename="include/EstacionMeteo.hpp" />

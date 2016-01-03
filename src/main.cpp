@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 
     Anotador thelog("sspmeteo.log");
-    thelog.anota("---------------------");
+    thelog.anota("--- NUEVO ARRANQUE ---");
 
     EstacionMeteo estacion;
     //std::cout << "\nEstación meteo arrancando...\n";

@@ -60,6 +60,7 @@ void SocketServer::escucha()
     if (status == -1)
         log.anota("ERROR AL HACER LISTEN. SocketServer::escucha()");
 
+    log.anota("Servidor a la escucha.");
     // Bucle de muestreo de nuevas conexiones
     fd_set readfds;
     timeval timeout;
@@ -113,7 +114,7 @@ void SocketServer::atiende_cliente(int sd_client)
         }
         //Algo se ha recibido
         msg_in.assign(recv_buff,bytes_recieved);
-        // NOTE: Los caracteres de escape son para telnet
+        // Los caracteres de escape son para poder conectarse por telnet
         if(msg_in == "getcurrent\r\n")
         {
             msg_out = estacion.getcurrent();

@@ -15,7 +15,7 @@ INC =
 CFLAGS = -std=c++0x -Wall
 RESINC = 
 LIBDIR = 
-LIB = -lwiringPi
+LIB = -lwiringPi -lcurl
 LDFLAGS = -pthread
 
 INC_DEBUG = $(INC) -Iinclude
