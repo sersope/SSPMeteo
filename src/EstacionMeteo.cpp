@@ -71,22 +71,22 @@ void EstacionMeteo::termina()
 void EstacionMeteo::procesa()
 {
     Anotador datos_log("datos.dat");
-    Anotador log("estacionMeteo.log");
+    Anotador log("sspmeteo.log");
     double un_minuto = 1 * 60.0;                // segundos
     double periodo_salvadatos = 1 * 60.0;      // segundos// NOTE (sergio#1#03/01/16): Para pruebas ponemos 1 minuto, luego ya se verá
     time_t timer_un_minuto,timer_salvadatos,ahora;
-    bool datosOK = false;
     // Espera a que lleguen datos validos por primera vez
-    log.anota("Esperando datos válidos...");
-    while(!datosOK)
+    log.anota("estacionMeteo: Esperando datos válidos...");
+    int todosOK = 0;
+    while(todosOK < 6)
     {
+        todosOK = 0;
         for( int i = 0; i < 6; i++)
             if( esMensajeBueno(i))
-                datosOK = true;
-            else
-                datosOK = false;
+                todosOK++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
-    log.anota("Datos válidos OK.");
+    log.anota("estacionMeteo: Datos válidos OK.");
     // Inicializacion de lluvia
     rain_init = getR();
     rain_cola.push(rain_init);

@@ -23,6 +23,7 @@ void Anotador::anota(const std::string & texto, char t)
     std::ofstream file(fname, std::ofstream::app);
 
     file << str_ahora(t) << "," << texto << std::endl;
+    file.flush();
     file.close();
 }
 

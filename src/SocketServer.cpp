@@ -6,12 +6,12 @@
 #include <netdb.h>      // Needed for the socket functions
 #include <sys/select.h> // Needed for the socket functions
 #include <chrono>
+#include "Anotador.hpp"
 
-SocketServer::SocketServer(std::string port, EstacionMeteo & estacion, Anotador & log)
+SocketServer::SocketServer(std::string port, EstacionMeteo & estacion)
 {
     this->port = port;
     this->estacion = estacion;
-    this->log = log;
     terminar = false;
     pt = 0;
 }
@@ -29,6 +29,7 @@ bool SocketServer::arranca()
 
 void SocketServer::escucha()
 {
+    Anotador log("sspmeteo.log");
     log.anota("Arrancando servidor ...");
     // Preparar/obtener la direccion del host y tipo de socket
     addrinfo host_info;                         // The struct that getaddrinfo() fills up with data.
@@ -93,6 +94,7 @@ void SocketServer::escucha()
 // TODO (sergio#1#06/10/15): Completar protocolo con cliente
 void SocketServer::atiende_cliente(int sd_client)
 {
+    Anotador log("sspmeteo.log");
     bool fin = false;
     char recv_buff[100];
     ssize_t bytes_recieved, bytes_sent;
@@ -145,6 +147,7 @@ void SocketServer::atiende_cliente(int sd_client)
 void SocketServer::termina()
 {
     // Cerrando threads servidor y threads de clientes
+    Anotador log("sspmeteo.log");
     log.anota("Cerrando servidor...");
     terminar = true;
     pt->join();

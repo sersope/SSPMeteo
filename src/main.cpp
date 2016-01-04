@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    SocketServer sserver("5556", estacion, thelog);
+    SocketServer sserver("5556", estacion);
     sserver.arranca();
 
     //std::cout << std::endl << "Pulse q(Q)+Intro  para terminar..." << std::endl;
