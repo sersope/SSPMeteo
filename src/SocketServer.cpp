@@ -121,9 +121,11 @@ void SocketServer::atiende_cliente(int sd_client)
         {
             msg_out = estacion.getcurrent();
         }
-        else if(msg_in == "getdaily\r\n")
+        else if(msg_in == "quitserver\r\n")
         {
-            msg_out = "Has solicitado datos diarios\n";
+            msg_out = "Adiós\n";
+            fin = true;
+            terminar = true;
         }
         else if(msg_in == "quit\r\n")
         {
@@ -148,17 +150,18 @@ void SocketServer::termina()
 {
     // Cerrando threads servidor y threads de clientes
     Anotador log("sspmeteo.log");
-    log.anota("Cerrando servidor...");
+    //log.anota("Cerrando servidor...");
     terminar = true;
     pt->join();
     for( auto it = pt_list.begin(); it != pt_list.end(); it++)
     {
         if((*it)->joinable())
         {
-            log.anota("Cerrando cliente...");
+            //log.anota("Cerrando cliente...");
             (*it)->join();
         }
     }
+    log.anota("Servidor y clientes cerrados.");
 }
 
 SocketServer::~SocketServer()

@@ -14,9 +14,9 @@ class SocketServer
         SocketServer(std::string port, EstacionMeteo & estacion);
         ~SocketServer();
         bool arranca();         //
+        bool terminar;
         void termina();
     private:
-        bool terminar;
         std::string port;
         pthread pt;                             // Thread escucha
         std::list<pthread> pt_list;             // Threads atiende_cliente's

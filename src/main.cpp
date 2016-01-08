@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 
     Anotador thelog("sspmeteo.log");
-    thelog.anota("--- NUEVO ARRANQUE ---");
+    thelog.anota("+++ NUEVO ARRANQUE +++");
 
     EstacionMeteo estacion;
     //std::cout << "\nEstación meteo arrancando...\n";
@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
     sserver.arranca();
 
     //std::cout << std::endl << "Pulse q(Q)+Intro  para terminar..." << std::endl;
-    bool salir = false;
+    //bool salir = false;
     //std::string tecla;
 
-    while(!salir)
+    while(!sserver.terminar)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         //std::cin >> tecla;
@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
     // Se debe parar el servidor
     estacion.termina();
     sserver.termina();
+
+    thelog.anota("--- FIN  ---");
 
     return 0;
 }

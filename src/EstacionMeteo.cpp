@@ -61,10 +61,12 @@ bool EstacionMeteo::arranca()
 
 void EstacionMeteo::termina()
 {
+    Anotador log("sspmeteo.log");
     if(pth != 0)
     {
         terminar = true;
         pth->join();
+        log.anota("estacionMeteo: Proceso terminado.");
     }
 }
 
@@ -72,9 +74,16 @@ void EstacionMeteo::procesa()
 {
     Anotador datos_log("datos.dat");
     Anotador log("sspmeteo.log");
-    double un_minuto = 1 * 60.0;                // segundos
-    double periodo_salvadatos = 1 * 60.0;      // segundos// NOTE (sergio#1#03/01/16): Para pruebas ponemos 1 minuto, luego ya se verá
+    double un_minuto = 1 * 60.0;               // segundos
+    double periodo_salvadatos = 5 * 60.0;      // segundos
     time_t timer_un_minuto,timer_salvadatos,ahora;
+    int hoy;
+    int mes;
+    int anyo;
+    int ayer;
+    char nomfile[30];
+    bool primera_vez = true;
+
     // Espera a que lleguen datos validos por primera vez
     log.anota("estacionMeteo: Esperando datos válidos...");
     int todosOK = 0;
@@ -84,42 +93,44 @@ void EstacionMeteo::procesa()
         for( int i = 0; i < 6; i++)
             if( esMensajeBueno(i))
                 todosOK++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     log.anota("estacionMeteo: Datos válidos OK.");
-    // Inicializacion de lluvia
-    rain_init = getR();
-    rain_cola.push(rain_init);
-    // Inicializacion de tiempos
-    time(&ahora);
-    timer_un_minuto = ahora;
-    timer_salvadatos = ahora;
-    int hoy = localtime(&ahora)->tm_mday;
-    int mes = localtime(&ahora)->tm_mon + 1;
-    int anyo = localtime(&ahora)->tm_year + 1900;
-    int ayer = hoy;
-    //Genera el nombre del fichero de datos diarios
-    std::stringstream nomfile;
-    nomfile.str("");
-    nomfile << anyo << "-" << mes << "-" << hoy << ".dat";
-    datos_log.setName(nomfile.str());
 
+    // Bucle de proceso
     while(!terminar)
     {
         time(&ahora);
         hoy = localtime(&ahora)->tm_mday;
 
+        if (primera_vez)
+        {
+            // Inicializacion de tiempos
+            timer_un_minuto = ahora;
+            timer_salvadatos = ahora;
+            mes = localtime(&ahora)->tm_mon + 1;
+            anyo = localtime(&ahora)->tm_year + 1900;
+            ayer = hoy;
+            //Genera el nombre del fichero de datos diarios
+            sprintf(nomfile, "%d-%02d-%02d.dat", anyo, mes, hoy);
+            datos_log.setName(std::string(nomfile));
+            // Inicializacion de lluvia diaria
+            rain_init = getR();
+            // Envio y salvado de los primeros datos
+            actualizaRH();
+            datos_log.anota(getcurrent());
+            uploadWunder();
+
+            primera_vez = false;
+        }
         // Por cambio de dia
         if(hoy != ayer)
         {
-            // Cambio de dia.
-
             // Obten nuevo nombre para el fichero de datos diarios
             mes = localtime(&ahora)->tm_mon + 1;
             anyo = localtime(&ahora)->tm_year + 1900;
-            nomfile.str("");
-            nomfile << anyo << "-" << mes << "-" << hoy << ".dat";
-            datos_log.setName(nomfile.str());
+            sprintf(nomfile, "%d-%02d-%02d.dat", anyo, mes, hoy);
+            datos_log.setName(std::string(nomfile));
             // Resetea la lluvia diaria
             rain_init = getR();
 
@@ -128,15 +139,15 @@ void EstacionMeteo::procesa()
         if(difftime(ahora,timer_un_minuto) >= un_minuto)
         {
             actualizaRH(); // Llamar cada minuto
-            // Envio a weather underground
-            uploadWunder();
 
             timer_un_minuto = ahora;
         }
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
         {
-            // Salva datos actuales
+            // Salva datos actuales a fichero
             datos_log.anota(getcurrent());
+            // Envio a weather underground
+            uploadWunder();
 
             timer_salvadatos = ahora;
         }
@@ -204,6 +215,8 @@ float EstacionMeteo::getRD(char unit)
         return rain_dia;
 }
 
+// Almacena en una cola los valores de lluvia de la ultima hora.
+// La diferencia entre el primer valor de la cola y el ultimo es la lluvia caída en la hora.
 void EstacionMeteo::actualizaRH()
 {
     rain_cola.push(getR());
@@ -276,7 +289,7 @@ bool EstacionMeteo::uploadWunder()
     CURL *curl;
     CURLcode res;
     char postfield[255];
-    Anotador log("wunder.log");
+    Anotador log("sspmeteo.log");
 
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
@@ -297,7 +310,7 @@ bool EstacionMeteo::uploadWunder()
             getT('F'), getH(), getTR('F'), getRD('I'), getRH(), getVV('M'), getVR('M'), getDV());
         /* Now specify the POST data */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
-        log.anota(postfield);
+        //log.anota(postfield);
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
         /* Check for errors */
