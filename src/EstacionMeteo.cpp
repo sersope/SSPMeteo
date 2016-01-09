@@ -28,20 +28,23 @@
 #include <sstream>
 #include <ctime>
 #include <thread>
+#include <functional> // for std::ref
 #include <Anotador.hpp>
 #include <curl/curl.h>
 #include <math.h>
+
 
 EstacionMeteo::EstacionMeteo()
 {
     temp = -70.0;
     humi = 0.0;
-    rain = 0;
-    rain_init = 0;
+    rain = 0.0;
+    rain_init = 0.0;
+    rain_hora = 0.0;
+    rain_dia = 0.0;
     vel_vent = 0.0;
     vel_racha = 0.0;
-    dir_vent = 0;
-
+    dir_vent =  0;
     pth = 0;
 }
 
@@ -277,10 +280,17 @@ unsigned EstacionMeteo::getDV()
 
 std::string EstacionMeteo::getcurrent()
 {
+    //PRUEBAS
+    //Anotador log("getcurrent.log");
+
     std::stringstream ss;
-    ss << getT() << "," << getH() << "," << getR() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
+    ss << getT() << "," << getH() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
+
+    //PRUEBAS
+    //log.anota(ss.str());
+
     return ss.str();
 }
 
@@ -289,7 +299,7 @@ bool EstacionMeteo::uploadWunder()
     CURL *curl;
     CURLcode res;
     char postfield[255];
-    Anotador log("sspmeteo.log");
+    Anotador log("wunder.log");
 
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
@@ -307,10 +317,10 @@ bool EstacionMeteo::uploadWunder()
         // Rellenamos los datos a enviar
         sprintf(postfield,
             "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d",
-            getT('F'), getH(), getTR('F'), getRD('I'), getRH(), getVV('M'), getVR('M'), getDV());
+            getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV());
         /* Now specify the POST data */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
-        //log.anota(postfield);
+        log.anota(postfield);
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
         /* Check for errors */

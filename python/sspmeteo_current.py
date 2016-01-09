@@ -27,15 +27,17 @@ while tecla != ord('q') and tecla != ord('Q'):
         d = cs.recv(128)
         if len(d)>0:
             l=[float(x) for x in d.split(',')]
-            pantalla.addstr( 4, 1, 'Temperatura = {:5.1f} C'.format(l[0]))
-            pantalla.addstr( 5, 1, 'Humedad     = {:5.1f} %'.format(l[1]))
-            pantalla.addstr( 6, 1, 'Lluvia      = {:5.1f} mm ({:5.0f})'.format(l[2], l[2] / 0.138)) # 0.138 mm/tick
-            pantalla.addstr( 7, 1, 'Vel. viento = {:5.1f} km/h'.format(l[3]))
-            pantalla.addstr( 8, 1, 'Vel. racha  = {:5.1f} km/h'.format(l[4]))
-            pantalla.addstr( 9, 1, 'Dir. viento = {:5.0f} grados'.format(l[5]))
-            pantalla.addstr(11, 1, 'Cal. recepc.= {:5.1f} % ({:2.0f})'.format(100.0 * l[6] / 54.0, l[6]))
-            pantalla.addstr(12, 1, '{:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f}'.format(l[7],l[8],l[9],l[10],l[11],l[12]))
-            pantalla.addstr(14,1,"('q' para terminar.)")
+            pantalla.addstr( 4, 1, 'Temperatura     = {:5.1f} C'.format(l[0]))
+            pantalla.addstr( 5, 1, 'Humedad         = {:5.1f} %'.format(l[1]))
+            pantalla.addstr( 6, 1, 'Lluvia          = {:5.1f} mm ({:5.0f})'.format(l[2], l[2] / 0.138)) # 0.138 mm/tick
+            pantalla.addstr( 7, 1, 'Lluvia ult.hora = {:5.1f} mm'.format(l[3]))
+            pantalla.addstr( 8, 1, 'Lluvia diaria   = {:5.1f} mm'.format(l[4]))
+            pantalla.addstr( 9, 1, 'Vel. viento     = {:5.1f} km/h'.format(l[5]))
+            pantalla.addstr(10, 1, 'Vel. racha      = {:5.1f} km/h'.format(l[6]))
+            pantalla.addstr(11, 1, 'Dir. viento     = {:5.0f} grados'.format(l[7]))
+            pantalla.addstr(12, 1, 'Cal. recepc.    = {:5.1f} % ({:2.0f})'.format(100.0 * l[8] / 54.0, l[8]))
+            pantalla.addstr(13, 1, '{:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f}'.format(l[9],l[10],l[11],l[12],l[13],l[14]))
+            pantalla.addstr(16,1,"('q' para terminar.)")
         else:
             pantalla.addstr( 2, 1, 'NO HAY CONEXION.')
             cs_error = True
