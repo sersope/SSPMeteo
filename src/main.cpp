@@ -11,16 +11,14 @@ int main(int argc, char *argv[])
     Anotador thelog("sspmeteo.log");
     thelog.anota("+++ NUEVO ARRANQUE +++");
 
-    EstacionMeteo estacion;
-    //std::cout << "\nEstación meteo arrancando...\n";
-    if (!estacion.arranca())
+    if (!EstacionMeteo::arranca())
     {
         //std::cout << "Estación meteo no pudo arrancar.\n" << std::endl;
         thelog.anota("Estación meteo no pudo arrancar.");
         return 0;
     }
 
-    SocketServer sserver("5556", estacion);
+    SocketServer sserver("5556");
     sserver.arranca();
 
     //std::cout << std::endl << "Pulse q(Q)+Intro  para terminar..." << std::endl;
@@ -35,7 +33,7 @@ int main(int argc, char *argv[])
     }
 
     // Se debe parar el servidor
-    estacion.termina();
+    EstacionMeteo::termina();
     sserver.termina();
 
     thelog.anota("--- FIN  ---");

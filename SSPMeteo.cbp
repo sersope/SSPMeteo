@@ -46,7 +46,9 @@ Use wiringPi library.]]>
 			<Add library="curl" />
 		</Linker>
 		<Unit filename="include/Anotador.hpp" />
-		<Unit filename="include/EstacionMeteo.hpp" />
+		<Unit filename="include/EstacionMeteo.hpp">
+			<Option compile="1" />
+		</Unit>
 		<Unit filename="include/ReceptorRF433.hpp" />
 		<Unit filename="include/SocketServer.hpp" />
 		<Unit filename="src/Anotador.cpp" />

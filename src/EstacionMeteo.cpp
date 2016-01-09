@@ -1,65 +1,79 @@
- /*
-    Codificación de datos:
-    -   nº del mensaje [1..255] 8 bits
-    // TODO (sergio#1#): Determinar códigos de error para los valores erróneos
-    -   temperatura [-30,0ºC, 70,0ºC] float    -> codigo temperatura= word(temperatura * 10) + 300 [0,1000]  Error de lectura:
-    -   humedad     [0.0%, 100.0%]    float    -> codigo humedad= word(humedad * 10)               [0,1000]. Error de lectura:
-    -   tics lluvia [0, 65535] 16 bits. word
-    -   velocidad viento [0.0, 160.0 km/h]     float    -> codigo vel. vent. = word(vel_vent * 10)
-    -   velocidad racha  [0.0, 160.0 km/h]     float    -> codigo vel. racha = word(vel_racha *10)
-    -   direccion viento [0, 359]     word
-    mensaje1: unsigned long. 32 bits
-        0000000000000001tttttttttttttttt -> temperatura.
-    mensaje2: unsigned long. 32 bits
-        0000000000000010hhhhhhhhhhhhhhhh -> humedad.
-    mensaje3: unsigned long. 32 bits
-        0000000000000011rrrrrrrrrrrrrrrr -> lluvia.
-    mensaje4: unsigned long. 32 bits
-        0000000000000100rrrrrrrrrrrrrrrr -> velocidad del viento.
-    mensaje5: unsigned long. 32 bits
-        0000000000000101rrrrrrrrrrrrrrrr -> velocidad de racha
-    mensaje6: unsigned long. 32 bits
-        0000000000000110rrrrrrrrrrrrrrrr -> direccion del viento
+/*
+   Codificación de datos:
+   -   nº del mensaje [1..255] 8 bits
+   -   temperatura [-30,0ºC, 70,0ºC] float    -> codigo temperatura= word(temperatura * 10) + 300 [0,1000]  Error de lectura:
+   -   humedad     [0.0%, 100.0%]    float    -> codigo humedad= word(humedad * 10)               [0,1000]. Error de lectura:
+   -   tics lluvia [0, 65535] 16 bits. word
+   -   velocidad viento [0.0, 160.0 km/h]     float    -> codigo vel. vent. = word(vel_vent * 10)
+   -   velocidad racha  [0.0, 160.0 km/h]     float    -> codigo vel. racha = word(vel_racha *10)
+   -   direccion viento [0, 359]     word
+   mensaje1: unsigned long. 32 bits
+       0000000000000001tttttttttttttttt -> temperatura.
+   mensaje2: unsigned long. 32 bits
+       0000000000000010hhhhhhhhhhhhhhhh -> humedad.
+   mensaje3: unsigned long. 32 bits
+       0000000000000011rrrrrrrrrrrrrrrr -> lluvia.
+   mensaje4: unsigned long. 32 bits
+       0000000000000100rrrrrrrrrrrrrrrr -> velocidad del viento.
+   mensaje5: unsigned long. 32 bits
+       0000000000000101rrrrrrrrrrrrrrrr -> velocidad de racha
+   mensaje6: unsigned long. 32 bits
+       0000000000000110rrrrrrrrrrrrrrrr -> direccion del viento
 */
 
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
+#include "Anotador.hpp"
 
 #include <sstream>
 #include <ctime>
 #include <thread>
-#include <functional> // for std::ref
-#include <Anotador.hpp>
 #include <curl/curl.h>
 #include <math.h>
+#include <queue>
+
+// FIXME (sergio#1#09/01/16): Si el programa se reinicia los datos de lluvia diaria y de última hora se pierden. ...
+//Si el arduino se reinicia con el programa ejecutandose estos valores serán negativos
 
 
-EstacionMeteo::EstacionMeteo()
+namespace EstacionMeteo
 {
-    temp = -70.0;
-    humi = 0.0;
-    rain = 0.0;
-    rain_init = 0.0;
-    rain_hora = 0.0;
-    rain_dia = 0.0;
-    vel_vent = 0.0;
-    vel_racha = 0.0;
-    dir_vent =  0;
-    pth = 0;
-}
+    // Variables internas al namespace
+    float temp = -70.0;             //celsisus o faranheit
+    float humi = 0.0;
+    float trocio = 0.0;             // Temperatura de rocio (calculada)
+    float rain = 0.0;               // Lluvia actual (acumulada en el arduino)
+    float rain_init = 0.0;          // Lluvia al inicio del programa y al inicio del dia
+    float rain_dia = 0.0;           // Lluvia acumulada en el dia
+    float rain_hora = 0.0;          // Lluvia acumulada en la ultima hora, se gestiona con una cola
+    float vel_vent = 0.0;           // km/h o mph
+    float vel_racha = 0.0;          // km/h o mph
+    int dir_vent = 0;               //º sexagesimales
+    std::queue<float> rain_cola;    //Cola para la lluvia en la ultima hora
+    std::thread * pth = nullptr;
+    bool terminar = false;
 
-EstacionMeteo::~EstacionMeteo()
-{
-    //delete pth;
+    // Funciones internas al namespace
+    void procesa();                 //the working thread
+    float getT(char unit='m');      // unit = 'm' sistema metrico
+    float getH();
+    float getTR(char unit='m');
+    float getVV(char unit='m');
+    float getVR(char unit='m');
+    unsigned getDV();
+    float getR(char unit='m');
+    float getRD(char unit='m'); //Obten la lluvia diaria (float porque puede ser en inches)
+    void actualizaRH(); // Actualiza la cola para la lluvia de la ultima hora
+    float getRH(char unit='m'); //Obten la lluvia en la ultima hora (float porque puede ser en inches)
+    bool uploadWunder();
+    bool esMensajeBueno(int nmen);
 }
 
 bool EstacionMeteo::arranca()
 {
     terminar = false;
-    pth = new std::thread(&EstacionMeteo::procesa, this);
-
+    pth = new std::thread(&EstacionMeteo::procesa);
     return ReceptorRF433::arranca();
-    //return true;
 }
 
 void EstacionMeteo::termina()
@@ -86,7 +100,6 @@ void EstacionMeteo::procesa()
     int ayer;
     char nomfile[30];
     bool primera_vez = true;
-
     // Espera a que lleguen datos validos por primera vez
     log.anota("estacionMeteo: Esperando datos válidos...");
     int todosOK = 0;
@@ -99,13 +112,11 @@ void EstacionMeteo::procesa()
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     log.anota("estacionMeteo: Datos válidos OK.");
-
     // Bucle de proceso
     while(!terminar)
     {
         time(&ahora);
         hoy = localtime(&ahora)->tm_mday;
-
         if (primera_vez)
         {
             // Inicializacion de tiempos
@@ -123,7 +134,6 @@ void EstacionMeteo::procesa()
             actualizaRH();
             datos_log.anota(getcurrent());
             uploadWunder();
-
             primera_vez = false;
         }
         // Por cambio de dia
@@ -136,13 +146,11 @@ void EstacionMeteo::procesa()
             datos_log.setName(std::string(nomfile));
             // Resetea la lluvia diaria
             rain_init = getR();
-
             ayer = hoy;
         }
         if(difftime(ahora,timer_un_minuto) >= un_minuto)
         {
             actualizaRH(); // Llamar cada minuto
-
             timer_un_minuto = ahora;
         }
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
@@ -151,7 +159,6 @@ void EstacionMeteo::procesa()
             datos_log.anota(getcurrent());
             // Envio a weather underground
             uploadWunder();
-
             timer_salvadatos = ahora;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -282,15 +289,12 @@ std::string EstacionMeteo::getcurrent()
 {
     //PRUEBAS
     //Anotador log("getcurrent.log");
-
     std::stringstream ss;
     ss << getT() << "," << getH() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
-
     //PRUEBAS
     //log.anota(ss.str());
-
     return ss.str();
 }
 
@@ -300,24 +304,20 @@ bool EstacionMeteo::uploadWunder()
     CURLcode res;
     char postfield[255];
     Anotador log("wunder.log");
-
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
-
     /* get a curl handle */
     curl = curl_easy_init();
     if(curl)
     {
-
         /* First set the URL that is about to receive our POST. This URL can
            just as well be a https:// URL if that is what should receive the
            data. */
         curl_easy_setopt(curl, CURLOPT_URL, "http://weatherstation.wunderground.com/weatherstation/updateweatherstation.php");
-
         // Rellenamos los datos a enviar
         sprintf(postfield,
-            "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d",
-            getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV());
+                "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d",
+                getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV());
         /* Now specify the POST data */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
         log.anota(postfield);
@@ -326,7 +326,6 @@ bool EstacionMeteo::uploadWunder()
         /* Check for errors */
         if(res != CURLE_OK)
             log.anota("ERROR 1 en EstacionMeteo::uploadWunder.");
-
         /* always cleanup */
         curl_easy_cleanup(curl);
     }
@@ -341,10 +340,8 @@ bool EstacionMeteo::uploadWunder()
 bool EstacionMeteo::esMensajeBueno(int nmen)
 {
     int n = ReceptorRF433::mensaje_indice[nmen];
-
     if( n < 3)
         return false;
-
     unsigned valor = ReceptorRF433::mensaje_tipo[nmen][0];
     for(int i = 0; i < n; i++)
         if( ReceptorRF433::mensaje_tipo[nmen][i] != valor)

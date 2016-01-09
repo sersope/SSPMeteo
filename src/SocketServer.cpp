@@ -7,11 +7,11 @@
 #include <sys/select.h> // Needed for the socket functions
 #include <chrono>
 #include "Anotador.hpp"
+#include "EstacionMeteo.hpp"
 
-SocketServer::SocketServer(std::string port, EstacionMeteo & estacion)
+SocketServer::SocketServer(std::string port)
 {
     this->port = port;
-    this->estacion = estacion;
     terminar = false;
     pt = 0;
 }
@@ -91,7 +91,6 @@ void SocketServer::escucha()
     close(sd_server);
     log.anota("Conexión servidor cerrada.");
 }
-// TODO (sergio#1#06/10/15): Completar protocolo con cliente
 void SocketServer::atiende_cliente(int sd_client)
 {
     Anotador log("sspmeteo.log");
@@ -119,7 +118,7 @@ void SocketServer::atiende_cliente(int sd_client)
         // Los caracteres de escape son para poder conectarse por telnet
         if(msg_in == "getcurrent\r\n")
         {
-            msg_out = estacion.getcurrent();
+            msg_out = EstacionMeteo::getcurrent();
         }
         else if(msg_in == "quitserver\r\n")
         {
