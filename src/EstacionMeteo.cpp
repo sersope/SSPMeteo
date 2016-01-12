@@ -287,14 +287,10 @@ unsigned EstacionMeteo::getDV()
 
 std::string EstacionMeteo::getcurrent()
 {
-    //PRUEBAS
-    //Anotador log("getcurrent.log");
     std::stringstream ss;
     ss << getT() << "," << getH() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
-    //PRUEBAS
-    //log.anota(ss.str());
     return ss.str();
 }
 
@@ -320,12 +316,13 @@ bool EstacionMeteo::uploadWunder()
                 getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV());
         /* Now specify the POST data */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
-        log.anota(postfield);
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
         /* Check for errors */
         if(res != CURLE_OK)
             log.anota("ERROR 1 en EstacionMeteo::uploadWunder.");
+        else
+            log.anota(postfield);
         /* always cleanup */
         curl_easy_cleanup(curl);
     }
