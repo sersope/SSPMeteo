@@ -31,6 +31,7 @@
 #include <curl/curl.h>
 #include <math.h>
 #include <queue>
+#include <fstream>
 
 // FIXME (sergio#1#09/01/16): Si el programa se reinicia los datos de lluvia diaria y de última hora se pierden. ...
 //Si el arduino se reinicia con el programa ejecutandose estos valores serán negativos
@@ -129,7 +130,20 @@ void EstacionMeteo::procesa()
             sprintf(nomfile, "%d-%02d-%02d.dat", anyo, mes, hoy);
             datos_log.setName(std::string(nomfile));
             // Inicializacion de lluvia diaria
-            rain_init = getR();
+            float aux_getR = getR();
+            std::ifstream file("lluvia.dat");
+            if( file.fail())
+                rain_init = aux_getR;
+            else
+            {
+                    float aux_fic;
+                    file >> aux_fic;
+                    file.close();
+                    if( aux_fic > aux_getR )
+                        rain_init = aux_getR;
+                    else
+                        rain_init = aux_fic;
+            }
             // Envio y salvado de los primeros datos
             actualizaRH();
             datos_log.anota(getcurrent());
@@ -146,6 +160,12 @@ void EstacionMeteo::procesa()
             datos_log.setName(std::string(nomfile));
             // Resetea la lluvia diaria
             rain_init = getR();
+            // Salva el valor de lluvia inicial del dia
+            std::ofstream file("lluvia.dat", std::ofstream::trunc);
+            file << rain_init << std::endl;
+            file.flush();
+            file.close();
+
             ayer = hoy;
         }
         if(difftime(ahora,timer_un_minuto) >= un_minuto)
@@ -218,7 +238,9 @@ float EstacionMeteo::getR(char unit)
 
 float EstacionMeteo::getRD(char unit)
 {
-    rain_dia = getR() - rain_init;
+    float aux = getR() - rain_init;
+    if ( aux >= 0.0 )
+        rain_dia = aux;
     if( unit == 'I')
         return (rain_dia / 25.4 ); // A pulgadas
     else
@@ -229,10 +251,18 @@ float EstacionMeteo::getRD(char unit)
 // La diferencia entre el primer valor de la cola y el ultimo es la lluvia caída en la hora.
 void EstacionMeteo::actualizaRH()
 {
-    rain_cola.push(getR());
+    float aux_getR = getR();
+    rain_cola.push(aux_getR);
     rain_hora = rain_cola.back() - rain_cola.front();
-    if(rain_cola.size() > 60) // 1 hora = 60 minutos. La funcion se ha de llamar cada minuto (necesario)
+    if( rain_cola.size() > 60 ) // 1 hora = 60 minutos. La funcion se ha de llamar cada minuto (necesario)
         rain_cola.pop();
+
+    if( rain_hora < 0.0 ) // Ha habido un reseteo del Arduino. Se debe reiniciar todo
+    {
+        rain_init = aux_getR;
+        while( rain_cola.size() > 1 ) //Vacia la cola a un elemento
+            rain_cola.pop();
+    }
 }
 
 float EstacionMeteo::getRH(char unit)
