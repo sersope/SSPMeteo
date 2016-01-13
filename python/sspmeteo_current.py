@@ -21,29 +21,31 @@ pantalla.nodelay(1)
 pantalla.addstr(0,1,'sspmeteo_current')
 cs_error = False
 
-while tecla != ord('q') and tecla != ord('Q'):
-    if not cs_error:
-        cs.send("getcurrent\r\n")
-        d = cs.recv(128)
-        if len(d)>0:
-            l=[float(x) for x in d.split(',')]
-            pantalla.addstr( 4, 1, 'Temperatura     = {:5.1f} C'.format(l[0]))
-            pantalla.addstr( 5, 1, 'Humedad         = {:5.1f} %'.format(l[1]))
-            pantalla.addstr( 6, 1, 'Lluvia          = {:5.1f} mm ({:5.0f})'.format(l[2], l[2] / 0.138)) # 0.138 mm/tick
-            pantalla.addstr( 7, 1, 'Lluvia ult.hora = {:5.1f} mm'.format(l[3]))
-            pantalla.addstr( 8, 1, 'Lluvia diaria   = {:5.1f} mm'.format(l[4]))
-            pantalla.addstr( 9, 1, 'Vel. viento     = {:5.1f} km/h'.format(l[5]))
-            pantalla.addstr(10, 1, 'Vel. racha      = {:5.1f} km/h'.format(l[6]))
-            pantalla.addstr(11, 1, 'Dir. viento     = {:5.0f} grados'.format(l[7]))
-            pantalla.addstr(12, 1, 'Cal. recepc.    = {:5.1f} % ({:2.0f})'.format(100.0 * l[8] / 54.0, l[8]))
-            pantalla.addstr(13, 1, '{:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f}'.format(l[9],l[10],l[11],l[12],l[13],l[14]))
-            pantalla.addstr(16,1,"('q' para terminar.)")
-        else:
-            pantalla.addstr( 2, 1, 'NO HAY CONEXION.')
-            cs_error = True
+while tecla != ord('q') and tecla != ord('Q') and not cs_error:
+    cs.send("getcurrent\r\n")
+    d = cs.recv(128)
+    if len(d)>0:
+        l=[float(x) for x in d.split(',')]
+        pantalla.addstr( 4, 1, 'Temperatura     = {:5.1f} C'.format(l[0]))
+        pantalla.addstr( 5, 1, 'Humedad         = {:5.1f} %'.format(l[1]))
+        pantalla.addstr( 6, 1, 'Punto de rocio  = {:5.1f} C'.format(l[2]))
+        pantalla.addstr( 7, 1, 'Lluvia total    = {:5.1f} mm (ticks {:5.0f})'.format(l[3], l[3] / 0.138)) # 0.138 mm/tick
+        pantalla.addstr( 8, 1, 'Lluvia ult.hora = {:5.1f} mm'.format(l[4]))
+        pantalla.addstr( 9, 1, 'Lluvia diaria   = {:5.1f} mm'.format(l[5]))
+        pantalla.addstr(10, 1, 'Vel. viento     = {:5.1f} km/h'.format(l[6]))
+        pantalla.addstr(11, 1, 'Vel. racha      = {:5.1f} km/h'.format(l[7]))
+        pantalla.addstr(12, 1, 'Dir. viento     = {:5.0f} grados'.format(l[8]))
+        pantalla.addstr(13, 1, 'Cal. recepc.    = {:5.1f} %'.format(100.0 * l[9] / 54.0))
+        pantalla.addstr(14, 1, '                  {:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f} {:2.0f} -> {:2.0f}'.format(l[10],l[11],l[12],l[13],l[14],l[15],l[9]))
+        pantalla.addstr(16,1,"('q' para terminar.)")
+    else:
+        cs_error = True
     time.sleep(0.25)
     tecla = pantalla.getch()
 
 cs.close()
 curses.nocbreak(); pantalla.keypad(0); curses.echo()
 curses.endwin()
+if cs_error:
+    print("Se perdió la conexion con el servidor.")
+

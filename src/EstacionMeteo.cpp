@@ -130,6 +130,8 @@ void EstacionMeteo::procesa()
             sprintf(nomfile, "%d-%02d-%02d.dat", anyo, mes, hoy);
             datos_log.setName(std::string(nomfile));
             // Inicializacion de lluvia diaria
+            // El valor de lluvia diaria inicial se toma del fichero que se salva al inicio del dia
+            // salvo si el Arduino se ha reiniciado.
             float aux_getR = getR();
             std::ifstream file("lluvia.dat");
             if( file.fail())
@@ -139,7 +141,7 @@ void EstacionMeteo::procesa()
                     float aux_fic;
                     file >> aux_fic;
                     file.close();
-                    if( aux_fic > aux_getR )
+                    if( aux_fic > aux_getR ) // Esto indica que el arduino se ha reiniciado.
                         rain_init = aux_getR;
                     else
                         rain_init = aux_fic;
@@ -318,7 +320,7 @@ unsigned EstacionMeteo::getDV()
 std::string EstacionMeteo::getcurrent()
 {
     std::stringstream ss;
-    ss << getT() << "," << getH() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
+    ss << getT() << "," << getH() << "," << getTR() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
     return ss.str();
