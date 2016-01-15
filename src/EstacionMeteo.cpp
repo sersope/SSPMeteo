@@ -1,4 +1,4 @@
-/*
+/**
    Codificación de datos:
    -   nº del mensaje [1..255] 8 bits
    -   temperatura [-30,0ºC, 70,0ºC] float    -> codigo temperatura= word(temperatura * 10) + 300 [0,1000]  Error de lectura:

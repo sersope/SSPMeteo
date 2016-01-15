@@ -10,4 +10,7 @@ docs/*.bak
 docs/*.htm*
 docs/*.svg
 Arduino/Ajuste-veleta
+doxygen/html
+doxygen/latex
+doxygen/rtf
 
