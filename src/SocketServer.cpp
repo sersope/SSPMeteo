@@ -120,7 +120,7 @@ void SocketServer::atiende_cliente(int sd_client)
         {
             msg_out = EstacionMeteo::getcurrent();
         }
-        else if(msg_in == "quitserver\r\n")
+        else if(msg_in == "stopserver\r\n")
         {
             msg_out = "Adiós\n";
             fin = true;

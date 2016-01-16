@@ -24,6 +24,7 @@
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
 #include "Anotador.hpp"
+#include "BMP085.hpp"
 
 #include <sstream>
 #include <ctime>
@@ -32,10 +33,6 @@
 #include <math.h>
 #include <queue>
 #include <fstream>
-
-// FIXME (sergio#1#09/01/16): Si el programa se reinicia los datos de lluvia diaria y de última hora se pierden. ...
-//Si el arduino se reinicia con el programa ejecutandose estos valores serán negativos
-
 
 namespace EstacionMeteo
 {
@@ -49,10 +46,15 @@ namespace EstacionMeteo
     float rain_hora = 0.0;          // Lluvia acumulada en la ultima hora, se gestiona con una cola
     float vel_vent = 0.0;           // km/h o mph
     float vel_racha = 0.0;          // km/h o mph
-    int dir_vent = 0;               //º sexagesimales
+    int dir_vent = 0;               // º sexagesimales
+    float tempIn = 0.0;             // Temperatura interior
+    float tempInF = 0.0;            // Temperatura interior en *F
+    float pres = 0.0;               // Presión relativa
+    float presInch = 0.0;           // Presión relativa en pulgadas de mercurio
     std::queue<float> rain_cola;    //Cola para la lluvia en la ultima hora
     std::thread * pth = nullptr;
     bool terminar = false;
+    BMP085 bmp(BMP085::OSS_ULTRAHIGH); // Sensor de presion y temperatura interior
 
     // Funciones internas al namespace
     void procesa();                 //the working thread
@@ -66,6 +68,8 @@ namespace EstacionMeteo
     float getRD(char unit='m'); //Obten la lluvia diaria (float porque puede ser en inches)
     void actualizaRH(); // Actualiza la cola para la lluvia de la ultima hora
     float getRH(char unit='m'); //Obten la lluvia en la ultima hora (float porque puede ser en inches)
+    void actualizaPR();  //Obten la presion relativa
+    void actualizaTI();  // Obten la temperatura interior (el sensor esta dentro de casa)
     bool uploadWunder();
     bool esMensajeBueno(int nmen);
 }
@@ -101,9 +105,10 @@ void EstacionMeteo::procesa()
     int ayer;
     char nomfile[30];
     bool primera_vez = true;
-    // Espera a que lleguen datos validos por primera vez
+    // Espera a que lleguen datos validos por primera vez desde el receptor RF
     log.anota("estacionMeteo: Esperando datos válidos...");
     int todosOK = 0;
+    // FIXME (sergio#1#16/01/16): En este bucle el programa no puede terminar
     while(todosOK < 6)
     {
         todosOK = 0;
@@ -148,6 +153,10 @@ void EstacionMeteo::procesa()
             }
             // Envio y salvado de los primeros datos
             actualizaRH();
+            // Actualiza los valores del sensor BMP180
+            actualizaPR();
+            actualizaTI();
+
             datos_log.anota(getcurrent());
             uploadWunder();
             primera_vez = false;
@@ -173,6 +182,10 @@ void EstacionMeteo::procesa()
         if(difftime(ahora,timer_un_minuto) >= un_minuto)
         {
             actualizaRH(); // Llamar cada minuto
+            // Actualiza los valores del sensor BMP180
+            actualizaPR();
+            actualizaTI();
+
             timer_un_minuto = ahora;
         }
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
@@ -197,7 +210,7 @@ float EstacionMeteo::getT(char unit)
             temp = aux;
     }
     if( unit == 'F')
-        return (1.8 * temp + 32); // Convierte a ºF
+        return (1.8 * temp + 32.0); // Convierte a ºF
     else
         return temp;
 }
@@ -218,7 +231,7 @@ float EstacionMeteo::getTR(char unit)
 {
     trocio = pow(humi / 100.0, 1.0 / 8.0) * (112.0 + 0.9 * temp) + 0.1 * temp - 112.0;
     if( unit == 'F' )
-        return (1.8 * trocio + 32);
+        return (1.8 * trocio + 32.0);
     else
         return trocio;
 }
@@ -305,6 +318,23 @@ float EstacionMeteo::getVR(char unit)
         return vel_racha;
 }
 
+// Los valores del BMP180  se actualizan en el bucle de proceso y no por peticion de clientes
+// Lo contrario podría saturar el sensor y provocar errores en las lecturas
+// Los valores convertidos a unidades son para Wunder
+// TODO (sergio#1#16/01/16): Tratar el tema  de errores en los valores del sensor BMP180
+void EstacionMeteo::actualizaPR()
+{
+    float p = bmp.getBoth().kPa * 10.0;
+    pres = BMP085::getMeanPressure(p, 20);  // 20m. de altitud
+    presInch = pres * 0.0295299830714;    // A pulgadas de columna de mercurio
+}
+
+void EstacionMeteo::actualizaTI()
+{
+    tempIn = bmp.getCelcius();
+    tempInF = 1.8 * tempIn + 32.0;
+}
+
 unsigned EstacionMeteo::getDV()
 {
     if( esMensajeBueno(5) )
@@ -320,7 +350,9 @@ unsigned EstacionMeteo::getDV()
 std::string EstacionMeteo::getcurrent()
 {
     std::stringstream ss;
-    ss << getT() << "," << getH() << "," << getTR() << "," << getR() << "," << getRH() << "," << getRD() << "," << getVV() << "," << getVR() << "," << getDV() << "," << ReceptorRF433::mensajes_recibidos;
+    ss << getT() << "," << getH() << "," << getTR() << "," << getR() << "," << getRH() << "," << getRD()
+       << "," << getVV() << "," << getVR() << "," << getDV() << "," << pres << "," << tempIn
+       << "," << ReceptorRF433::mensajes_recibidos;
     for( int i = 0; i < 6; i++)
         ss << "," << ReceptorRF433::mensaje_indice[i];
     return ss.str();
@@ -344,8 +376,8 @@ bool EstacionMeteo::uploadWunder()
         curl_easy_setopt(curl, CURLOPT_URL, "http://weatherstation.wunderground.com/weatherstation/updateweatherstation.php");
         // Rellenamos los datos a enviar
         sprintf(postfield,
-                "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d",
-                getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV());
+                "ID=ICOMUNID54&PASSWORD=laura11&action=updateraw&dateutc=now&tempf=%f&humidity=%f&dewptf=%f&dailyrainin=%f&rainin=%f&windspeedmph=%f&windgustmph=%f&winddir=%d&baromin=%f&indoortempf=%f",
+                getT('F'), getH(), getTR('F'), getRD('I'), getRH('I'), getVV('M'), getVR('M'), getDV(), presInch, tempInF);
         /* Now specify the POST data */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfield);
         /* Perform the request, res will get the return code */
