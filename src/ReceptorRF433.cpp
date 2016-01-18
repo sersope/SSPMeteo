@@ -7,6 +7,14 @@ int ReceptorRF433::last_mensa = 0;
 int ReceptorRF433::mensajes_recibidos = 0;
 int ReceptorRF433::mensaje_indice[ReceptorRF433::N_MENSAJES]{};
 
+/** Esta función habilita la recepción de mensajes
+ *  desde la estación.
+ *  Se inicializa la librería WiringPi.
+ *  Se asocia la función manejadora de la interrupción de disparo del pin.
+ *
+ * \return bool. false si falla la inicializacion de WiringPi, true si OK.
+ *
+ */
 bool ReceptorRF433::arranca()
 {
     if(wiringPiSetup() == -1)
@@ -88,8 +96,8 @@ bool ReceptorRF433::receiveProtocol1(unsigned int changeCount)
         // Cada tipo de mensaje (de 1 a "N_MENSAJES") se recibe un nº de veces.
         // Los mensajes se almacenan en el array de 2 dimensiones "mensaje_tipo" ordenados por el tipo de mensaje
         // El nº de veces que se recibe cada tipo de mensaje se almacena en el array "mensaje_indice"
-        int n = (code & 0xFF0000) >> 16; //Nº del mensaje
-        if (n >= 1 && n <= N_MENSAJES)
+        int n = (code & 0xFF0000) >> 16; //tipo de mensaje
+        if (n >= 1 && n <= N_MENSAJES) // 2º filtro
         {
             int m = n-1; //Es el indice para los arrays;
 
@@ -123,4 +131,23 @@ void ReceptorRF433::reseteaArraysMensajes()
             mensaje_tipo[fila][columna] = 99999; // Para distinguir si el mensaje se ocupa
     }
     mensajes_recibidos = 0;
+}
+
+/** Si se reciben tres o mas mensajes iguales del mismo tipo
+ *  el mensaje se da como bueno.
+ *
+ * \param nmen Tipo de mensaje
+ * \return bool Devuelve true si el mensaje se da como válido.
+ *
+ */
+bool ReceptorRF433::mensajeOK(int nmen)
+{
+    int n = mensaje_indice[nmen];
+    if( n < 3)
+        return false;
+    unsigned valor = mensaje_tipo[nmen][0];
+    for(int i = 0; i < n; i++)
+        if( mensaje_tipo[nmen][i] != valor)
+            return false;
+    return true;
 }

@@ -71,7 +71,6 @@ namespace EstacionMeteo
     void actualizaPR();  //Obten la presion relativa
     void actualizaTI();  // Obten la temperatura interior (el sensor esta dentro de casa)
     bool uploadWunder();
-    bool esMensajeBueno(int nmen);
 }
 
 bool EstacionMeteo::arranca()
@@ -113,7 +112,7 @@ void EstacionMeteo::procesa()
     {
         todosOK = 0;
         for( int i = 0; i < 6; i++)
-            if( esMensajeBueno(i))
+            if( ReceptorRF433::mensajeOK(i))
                 todosOK++;
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
@@ -202,7 +201,7 @@ void EstacionMeteo::procesa()
 
 float EstacionMeteo::getT(char unit)
 {
-    if( esMensajeBueno(0) )
+    if( ReceptorRF433::mensajeOK(0) )
     {
         float aux;
         aux = ((ReceptorRF433::mensaje_tipo[0][0] & 0xFFFF) - 300.0) / 10.0;
@@ -217,7 +216,7 @@ float EstacionMeteo::getT(char unit)
 
 float EstacionMeteo::getH()
 {
-    if( esMensajeBueno(1) )
+    if( ReceptorRF433::mensajeOK(1) )
     {
         float aux;
         aux = (ReceptorRF433::mensaje_tipo[1][0] & 0xFFFF) / 10.0;
@@ -238,7 +237,7 @@ float EstacionMeteo::getTR(char unit)
 
 float EstacionMeteo::getR(char unit)
 {
-    if( esMensajeBueno(2) )
+    if( ReceptorRF433::mensajeOK(2) )
     {
         unsigned aux;
         aux = ReceptorRF433::mensaje_tipo[2][0] & 0xFFFF;
@@ -290,7 +289,7 @@ float EstacionMeteo::getRH(char unit)
 
 float EstacionMeteo::getVV(char unit)
 {
-    if( esMensajeBueno(3) )
+    if( ReceptorRF433::mensajeOK(3) )
     {
         float aux;
         aux = (ReceptorRF433::mensaje_tipo[3][0] & 0xFFFF) / 10.0;
@@ -305,7 +304,7 @@ float EstacionMeteo::getVV(char unit)
 
 float EstacionMeteo::getVR(char unit)
 {
-    if( esMensajeBueno(4) )
+    if( ReceptorRF433::mensajeOK(4) )
     {
         float aux;
         aux = (ReceptorRF433::mensaje_tipo[4][0] & 0xFFFF) / 10.0;
@@ -337,7 +336,7 @@ void EstacionMeteo::actualizaTI()
 
 unsigned EstacionMeteo::getDV()
 {
-    if( esMensajeBueno(5) )
+    if( ReceptorRF433::mensajeOK(5) )
     {
         int aux;
         aux = ReceptorRF433::mensaje_tipo[5][0] & 0xFFFF;
@@ -393,19 +392,5 @@ bool EstacionMeteo::uploadWunder()
     else
         log.anota("ERROR 2 en EstacionMeteo::uploadWunder.");
     curl_global_cleanup();
-    return true;
-}
-
-// Filtrado de mensajes recibidos.
-// Por lo menos tres mensajes y todos iguales
-bool EstacionMeteo::esMensajeBueno(int nmen)
-{
-    int n = ReceptorRF433::mensaje_indice[nmen];
-    if( n < 3)
-        return false;
-    unsigned valor = ReceptorRF433::mensaje_tipo[nmen][0];
-    for(int i = 0; i < n; i++)
-        if( ReceptorRF433::mensaje_tipo[nmen][i] != valor)
-            return false;
     return true;
 }
