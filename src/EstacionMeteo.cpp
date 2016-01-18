@@ -36,10 +36,9 @@
 #include "ReceptorRF433.hpp"
 #include "Anotador.hpp"
 #include "BMP085.hpp"
-
+#include "SocketServer.hpp""
 #include <sstream>
 #include <ctime>
-#include <thread>
 #include <curl/curl.h>
 #include <math.h>
 #include <queue>
@@ -63,12 +62,10 @@ namespace EstacionMeteo
     float pres = 0.0;               // Presión relativa
     float presInch = 0.0;           // Presión relativa en pulgadas de mercurio
     std::queue<float> rain_cola;    // Cola para la lluvia en la ultima hora
-    std::thread * pth = nullptr;
-    bool terminar = false;
     BMP085 bmp(BMP085::OSS_ULTRAHIGH); // Sensor de presion y temperatura interior
-
+    SocketServer sserver("5556");
     // Funciones internas al namespace
-    void procesa();                 // the working thread
+    void procesa();                 // bucle de proceso
     float getT(char unit='m');      // unit = 'm' sistema metrico
     float getH();
     float getTR(char unit='m');
@@ -86,20 +83,21 @@ namespace EstacionMeteo
 
 bool EstacionMeteo::arranca()
 {
-    terminar = false;
-    pth = new std::thread(&EstacionMeteo::procesa);
-    return ReceptorRF433::arranca();
+    Anotador log("sspmeteo.log");
+
+    sserver.arranca();
+    if (ReceptorRF433::arranca())
+        return true;
+    else
+    {
+        log.anota("EstacionMeteo: error en arranca.");
+        return false;
+    }
 }
 
 void EstacionMeteo::termina()
 {
-    Anotador log("sspmeteo.log");
-    if(pth != 0)
-    {
-        terminar = true;
-        pth->join();
-        log.anota("estacionMeteo: Proceso terminado.");
-    }
+    sserver.termina();
 }
 
 void EstacionMeteo::procesa()
@@ -115,11 +113,11 @@ void EstacionMeteo::procesa()
     int ayer;
     char nomfile[30];
     bool primera_vez = true;
-    // Espera a que lleguen datos validos por primera vez desde el receptor RF
-    log.anota("estacionMeteo: Esperando datos válidos...");
     int todosOK = 0;
-    // FIXME (sergio#1#16/01/16): En este bucle el programa no puede terminar
-    while(todosOK < 6)
+
+    log.anota("EstacionMeteo: Esperando datos válidos...");
+    // Espera a que lleguen datos validos por primera vez desde el receptor RF
+    while(todosOK < 6 && !sserver.terminar)
     {
         todosOK = 0;
         for( int i = 0; i < 6; i++)
@@ -127,14 +125,14 @@ void EstacionMeteo::procesa()
                 todosOK++;
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-    log.anota("estacionMeteo: Datos válidos OK.");
     // Bucle de proceso
-    while(!terminar)
+    while(!sserver.terminar)
     {
         time(&ahora);
         hoy = localtime(&ahora)->tm_mday;
         if (primera_vez)
         {
+            log.anota("EstacionMeteo: Datos válidos OK.");
             // Inicializacion de tiempos
             timer_un_minuto = ahora;
             timer_salvadatos = ahora;
@@ -156,17 +154,17 @@ void EstacionMeteo::procesa()
                     float aux_fic;
                     file >> aux_fic;
                     file.close();
-                    if( aux_fic > aux_getR ) // Esto indica que el arduino se ha reiniciado.
+                    if( aux_fic > aux_getR ) // Esto indica que el arduino se ha reiniciado. Pasando del valor del fichero
                         rain_init = aux_getR;
                     else
                         rain_init = aux_fic;
             }
-            // Envio y salvado de los primeros datos
+            // Inicializa cola lluvia ultima hora
             actualizaRH();
             // Actualiza los valores del sensor BMP180
             actualizaPR();
             actualizaTI();
-
+            // Salva datos y envia a Wunder
             datos_log.anota(getcurrent());
             uploadWunder();
             primera_vez = false;
@@ -189,21 +187,25 @@ void EstacionMeteo::procesa()
 
             ayer = hoy;
         }
+        // En cada minuto
         if(difftime(ahora,timer_un_minuto) >= un_minuto)
         {
-            actualizaRH(); // Llamar cada minuto
+            // Actualiza cola de lluvia ultima hora
+            actualizaRH();
             // Actualiza los valores del sensor BMP180
             actualizaPR();
             actualizaTI();
 
             timer_un_minuto = ahora;
         }
+        // En cada intervalo salvadatos
         if(difftime(ahora,timer_salvadatos) >= periodo_salvadatos)
         {
             // Salva datos actuales a fichero
             datos_log.anota(getcurrent());
             // Envio a weather underground
             uploadWunder();
+
             timer_salvadatos = ahora;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));

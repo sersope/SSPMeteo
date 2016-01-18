@@ -10,9 +10,11 @@ namespace EstacionMeteo
 {
         /// Lanza el proceso continuo de ejecución.
         bool arranca();
-        /// Devuelve un string con los datos actuales de la estación.
-        std::string getcurrent();
+        /// Este es el proceso continuo de ejecución.
+        bool procesa();
         /// Finaliza el proceso continuo de ejecución.
         void termina();
+        /// Devuelve un string con los datos actuales de la estación.
+        std::string getcurrent();
 }
 #endif // __ESTACION__METEO__HPP
