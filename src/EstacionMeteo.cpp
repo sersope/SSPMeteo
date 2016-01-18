@@ -1,25 +1,36 @@
 /**
-   Codificación de datos:
-   -   nº del mensaje [1..255] 8 bits
-   -   temperatura [-30,0ºC, 70,0ºC] float    -> codigo temperatura= word(temperatura * 10) + 300 [0,1000]  Error de lectura:
-   -   humedad     [0.0%, 100.0%]    float    -> codigo humedad= word(humedad * 10)               [0,1000]. Error de lectura:
-   -   tics lluvia [0, 65535] 16 bits. word
-   -   velocidad viento [0.0, 160.0 km/h]     float    -> codigo vel. vent. = word(vel_vent * 10)
-   -   velocidad racha  [0.0, 160.0 km/h]     float    -> codigo vel. racha = word(vel_racha *10)
-   -   direccion viento [0, 359]     word
-   mensaje1: unsigned long. 32 bits
-       0000000000000001tttttttttttttttt -> temperatura.
-   mensaje2: unsigned long. 32 bits
-       0000000000000010hhhhhhhhhhhhhhhh -> humedad.
-   mensaje3: unsigned long. 32 bits
-       0000000000000011rrrrrrrrrrrrrrrr -> lluvia.
-   mensaje4: unsigned long. 32 bits
-       0000000000000100rrrrrrrrrrrrrrrr -> velocidad del viento.
-   mensaje5: unsigned long. 32 bits
-       0000000000000101rrrrrrrrrrrrrrrr -> velocidad de racha
-   mensaje6: unsigned long. 32 bits
-       0000000000000110rrrrrrrrrrrrrrrr -> direccion del viento
-*/
+ *  En cada recepción desde la estación se reciben mensajes conteniendo los datos.
+ *
+ *  Los mensajes recibidos son enteros de 32 bits (unsigned int) donde el
+ *  byte MSB es siempre cero, el siguiente byte contiene el nº(tipo) de mensaje
+ *  y los dos bytes LSB contienen el valor del dato según:
+ *
+ *  -mensaje1: 00000000 00000001 ######## ######## -> temperatura.
+ *
+ *  -mensaje2: 00000000 00000010 ######## ######## -> humedad.
+ *
+ *  -mensaje3: 00000000 00000011 ######## ######## -> lluvia.
+ *
+ *  -mensaje4: 00000000 00000100 ######## ######## -> velocidad del viento.
+ *
+ *  -mensaje5: 00000000 00000101 ######## ######## -> velocidad de racha
+ *
+ *  -mensaje6: 00000000 00000110 ######## ######## -> direccion del viento
+ *
+ *  Los datos se obtienen de la siguiente manera:
+ *  -   temperatura      [0,1000]   -> float ( (valor - 300.0) / 10.0) [-30,0ºC, 70,0ºC]
+ *  -   humedad          [0,1000]   -> float (valor / 10.0)            [0.0%, 100.0%]
+ *  -   tics lluvia      [0, 65535] -> float (valor * 0.138)           [0.0 mm, 9044 mm]
+ *  -   velocidad viento [0,1600]   -> float (valor / 10.0)            [0.0, 160.0 km/h]
+ *  -   velocidad racha  [0,1600]   -> float (valor / 10.0)            [0.0, 160.0 km/h]
+ *  -   direccion viento [0, 359]   -> unsigned valor                  [0, 359]
+ *
+ *  Además, internamente se obtienen otros valores calculados como son
+ *  la temperatura de rocío, la lluvia de la última hora y la lluvia en el día.
+ *
+ *  Los valores de presión y temperatura interior se obtienen del sensor BMP180
+ *  conectado a la Raspberry, encapsulado en la clase BMP085.
+ */
 
 #include "EstacionMeteo.hpp"
 #include "ReceptorRF433.hpp"
@@ -51,13 +62,13 @@ namespace EstacionMeteo
     float tempInF = 0.0;            // Temperatura interior en *F
     float pres = 0.0;               // Presión relativa
     float presInch = 0.0;           // Presión relativa en pulgadas de mercurio
-    std::queue<float> rain_cola;    //Cola para la lluvia en la ultima hora
+    std::queue<float> rain_cola;    // Cola para la lluvia en la ultima hora
     std::thread * pth = nullptr;
     bool terminar = false;
     BMP085 bmp(BMP085::OSS_ULTRAHIGH); // Sensor de presion y temperatura interior
 
     // Funciones internas al namespace
-    void procesa();                 //the working thread
+    void procesa();                 // the working thread
     float getT(char unit='m');      // unit = 'm' sistema metrico
     float getH();
     float getTR(char unit='m');
@@ -65,11 +76,11 @@ namespace EstacionMeteo
     float getVR(char unit='m');
     unsigned getDV();
     float getR(char unit='m');
-    float getRD(char unit='m'); //Obten la lluvia diaria (float porque puede ser en inches)
-    void actualizaRH(); // Actualiza la cola para la lluvia de la ultima hora
-    float getRH(char unit='m'); //Obten la lluvia en la ultima hora (float porque puede ser en inches)
-    void actualizaPR();  //Obten la presion relativa
-    void actualizaTI();  // Obten la temperatura interior (el sensor esta dentro de casa)
+    float getRD(char unit='m');     // Obten la lluvia diaria (float porque puede ser en inches)
+    void actualizaRH();             // Actualiza la cola para la lluvia de la ultima hora
+    float getRH(char unit='m');     // Obten la lluvia en la ultima hora (float porque puede ser en inches)
+    void actualizaPR();             // Obten la presion relativa
+    void actualizaTI();             // Obten la temperatura interior (el sensor esta dentro de casa)
     bool uploadWunder();
 }
 

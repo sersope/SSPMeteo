@@ -4,6 +4,10 @@
 #include "EstacionMeteo.hpp"
 #include "SocketServer.hpp"
 #include "Anotador.hpp"
+// TODO (sergio#1#18/01/16): - Hacer SocketServer estatica pura ...
+//- Lanzar el proceso de EstacionMeteo en main() eliminando el thread.
+//- Convertir namespace EstacionMeteo en clase estatica pura.
+//- Aligerar main() al máximo.
 
 int main(int argc, char *argv[])
 {
