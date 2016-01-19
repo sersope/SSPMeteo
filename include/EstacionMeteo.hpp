@@ -8,11 +8,11 @@
  */
 namespace EstacionMeteo
 {
-        /// Lanza el proceso continuo de ejecución.
+        /// Lanza el servidor de sockets y el receptor RF433.
         bool arranca();
-        /// Este es el proceso continuo de ejecución.
+        /// Este es el bucle continuo de ejecución.
         void procesa();
-        /// Finaliza el proceso continuo de ejecución.
+        /// Cierra el servidor de sockets y posibles clientes.
         void termina();
         /// Devuelve un string con los datos actuales de la estación.
         std::string getcurrent();

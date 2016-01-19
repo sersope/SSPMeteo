@@ -80,6 +80,11 @@ namespace EstacionMeteo
     bool uploadWunder();
 }
 
+/**
+ *
+ * \return bool. true si todo es correcto.
+ *
+ */
 bool EstacionMeteo::arranca()
 {
     Anotador log("sspmeteo.log");
