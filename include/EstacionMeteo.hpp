@@ -11,7 +11,7 @@ namespace EstacionMeteo
         /// Lanza el proceso continuo de ejecución.
         bool arranca();
         /// Este es el proceso continuo de ejecución.
-        bool procesa();
+        void procesa();
         /// Finaliza el proceso continuo de ejecución.
         void termina();
         /// Devuelve un string con los datos actuales de la estación.

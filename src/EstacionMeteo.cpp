@@ -36,7 +36,7 @@
 #include "ReceptorRF433.hpp"
 #include "Anotador.hpp"
 #include "BMP085.hpp"
-#include "SocketServer.hpp""
+#include "SocketServer.hpp"
 #include <sstream>
 #include <ctime>
 #include <curl/curl.h>
@@ -65,7 +65,6 @@ namespace EstacionMeteo
     BMP085 bmp(BMP085::OSS_ULTRAHIGH); // Sensor de presion y temperatura interior
     SocketServer sserver("5556");
     // Funciones internas al namespace
-    void procesa();                 // bucle de proceso
     float getT(char unit='m');      // unit = 'm' sistema metrico
     float getH();
     float getTR(char unit='m');
@@ -210,6 +209,8 @@ void EstacionMeteo::procesa()
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
+    log.anota("EstacionMeteo: Proceso terminado.");
 }
 
 float EstacionMeteo::getT(char unit)
