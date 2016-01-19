@@ -6,7 +6,7 @@
 /** \brief Clase para la recepción de mensajes desde la estación.
  *
  *  La clase ReceptorRF433 recibe los mensajes del modulo RF-Receiver conectado a la entrada
- *  RF_PIN de las gpios de la Raspberry.
+ *  RF_PIN de la GPIO de la Raspberry.
  *  Los mensajes tienen 24 bits de longitud, los dos bytes menos significativos contienen el
  *  cuerpo del mensaje. El byte siguiente contiene un número de 1 a N_MENSAJES indicando el
  *  tipo de mensaje.
@@ -15,12 +15,12 @@
  *  Cada tipo de mensaje se recibe un número determinado de veces (REPETIDOS) para
  *  asegurar la fiabilida de los datos y la calidad de la transmisión.
  *  Los mensajes se depositan en el array doble mensaje_tipo. mensaje_tipo contiene todos
- *  los mensajes recibidos de cada tipo.
+ *  los mensajes recibidos de cada tipo en la última transmisión.
  *
  *  ReceptorRF433 es una clase static pura y por lo tanto no se necesita ninguna instanciación.
- *  Los clientes deben llamar a la función arranca() para iniciar la recepción.
+ *  En el inicio se debe llamar a la función arranca() para iniciar la recepción.
  *
- *  Para el acceso a la gpio se utiliza la librería WiringPi (http://wiringpi.com/).
+ *  Para el acceso a la GPIO se utiliza la librería WiringPi (http://wiringpi.com/).
  *
  *  Se usa parte del código de la clase RCSwitch:
  *          - RCSwitch - Arduino libary for remote control outlet switches.
@@ -47,11 +47,11 @@ class ReceptorRF433
     static bool receiveProtocol1(unsigned int changeCount);
     static void reseteaArraysMensajes();
   public:
-    /// Contiene la cantidad de mensajes recibidos de cada tipo en cada transmisión.
+    /// Contiene la cantidad de mensajes recibidos de cada tipo en la última transmisión.
     static int mensaje_indice[N_MENSAJES];
-    /// Contiene el nº total de mensajes recibidos en cada transmisión.
+    /// Contiene el nº total de mensajes recibidos en la última transmisión.
     static int mensajes_recibidos;
-    ///Contiene todos los mensajes recibidos en cada transmisión.
+    ///Contiene todos los mensajes recibidos en la última transmisión.
     static unsigned mensaje_tipo[N_MENSAJES][REPETIDOS];
     /// Habilita la recepción de mensajes.
     static bool arranca();

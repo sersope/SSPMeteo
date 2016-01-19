@@ -9,6 +9,11 @@
 #include "Anotador.hpp"
 #include "EstacionMeteo.hpp"
 
+/**
+ *
+ * \param port std::string. Puerto de escucha para la comunicación.
+ *
+ */
 SocketServer::SocketServer(std::string port)
 {
     this->port = port;
@@ -16,6 +21,12 @@ SocketServer::SocketServer(std::string port)
     pt = 0;
 }
 
+/**
+ * \return bool
+ * Si el thread no está inciado, lo inicia y devuelve true.
+ * Si el proceso ya está iniciao devuelve false.
+ *
+ */
 bool SocketServer::arranca()
 {
     if(!pt)
@@ -145,6 +156,12 @@ void SocketServer::atiende_cliente(int sd_client)
     close(sd_client);
     log.anota("Conexión cliente cerrada.");
 }
+/** Cierra el trhead de escucha.
+ * Detiene cada thread de cliente.
+ *
+ * \return void
+ *
+ */
 void SocketServer::termina()
 {
     // Cerrando threads servidor y threads de clientes

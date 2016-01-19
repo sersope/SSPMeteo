@@ -16,13 +16,13 @@ class Anotador
     public:
         /// \brief Constructor por defecto.
         Anotador();
-        /// \brief Constructor con el nombre del ficehro.
+        /// \brief Constructor con el nombre del fichero.
         Anotador(const std::string & fname);
         /// \brief Cambia el nombre del fichero.
         void setName(const std::string & fname);
         /// \brief Añade un nuevo mensaje en el fichero.
         void anota(const std::string & texto,char t='l');
-        /// Obtiene la fecha y hora formateadas.
+        /// Obtiene la fecha y hora actuales formateadas.
         std::string str_ahora(char t='l');
     private:
         std::string fname;

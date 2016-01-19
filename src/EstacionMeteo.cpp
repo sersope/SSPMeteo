@@ -365,6 +365,22 @@ unsigned EstacionMeteo::getDV()
     return dir_vent;
 }
 
+/** Se devuelven los siguientes valores separados por comas:
+ *
+ * - temperatura (ºC),
+ * - humedad (%),
+ * - punto de rocío (ºC),
+ * - lluvia total desde el último reinico del arduino (mm),
+ * - lluvia última hora (mm),
+ * - lluvia en el día (mm),
+ * - velocida del viento (km/h),
+ * - velocidad de rachas (km/h),
+ * - dirección del viento (º),
+ * - presión relativa (mbar),
+ * - temperatura interior (ºC),
+ * - Nº total de mensajes recibidos y nº de mensajes recibidos por cada mensaje tipo.
+ * \return std::string. string con los valores separados por comas.
+ */
 std::string EstacionMeteo::getcurrent()
 {
     std::stringstream ss;

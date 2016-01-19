@@ -8,6 +8,8 @@
 #include <exception>
 #include <inttypes.h>
 
+/** \brief Clase que encapsula el sensor BMP180 conectado a la Raspberry.
+ */
 class BMP085 {
     public:
         static constexpr double SEA_LEVEL_PRESSURE = 101.325;
