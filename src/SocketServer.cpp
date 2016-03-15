@@ -126,10 +126,19 @@ void SocketServer::atiende_cliente(int sd_client)
         }
         //Algo se ha recibido
         msg_in.assign(recv_buff,bytes_recieved);
+        std::string orden = msg_in.substr(0,7); // getfile
         // Los caracteres de escape son para poder conectarse por telnet
         if(msg_in == "getcurrent\r\n")
         {
             msg_out = EstacionMeteo::getcurrent();
+        }
+        else if (orden == "getfile")
+        {
+            int l = msg_in.find('\r') - 8;
+            std::string fname = msg_in.substr(8,l);
+            // Se añade al final un caracter de escape (\0x0b) para identificar el final del mensaje
+            // Los clientes deberán reconocer este caracter como fin de mensaje
+            msg_out = EstacionMeteo::getfile(fname) + "\v";
         }
         else if(msg_in == "stopserver\r\n")
         {

@@ -16,5 +16,7 @@ namespace EstacionMeteo
         void termina();
         /// Devuelve un string con los datos actuales de la estación.
         std::string getcurrent();
+        /// Devuelve el contenido del fichero con nombre 'filename'
+        std::string getfile(std::string filename);
 }
 #endif // __ESTACION__METEO__HPP

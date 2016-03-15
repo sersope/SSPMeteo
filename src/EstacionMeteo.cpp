@@ -392,6 +392,24 @@ std::string EstacionMeteo::getcurrent()
     return ss.str();
 }
 
+/** Se devuelve el contenido del fichero solicitado
+ *
+ * Si se produce una condición de error con el fichero se devuelve "ERROR".
+ * \param filename. String con el nombre del fichero a devolver
+ * \return std::string. string con los valores separados por comas.
+ */
+std::string EstacionMeteo::getfile(std::string filename)
+{
+    std::ifstream file(filename);
+    std::stringstream buffer;
+    if (!file.fail())
+        buffer << file.rdbuf();
+    else
+        buffer << "ERROR";
+    file.close();
+    return buffer.str();
+}
+
 bool EstacionMeteo::uploadWunder()
 {
     CURL *curl;

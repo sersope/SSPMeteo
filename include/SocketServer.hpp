@@ -16,6 +16,7 @@ typedef std::thread * pthread;
  * de un cliente se lanza un thread para la gestión de la comunicación con el cliente.
  * El cliente puede solicitar lo siguiente:
  * - Obtener los datos actuales de la estación ("getcurrent\r\n"). Se devuelve un string con los valores separados por comas.
+ * - Obtener el contenido del fichero ("getfile filename\r\n"). Se devuelve un string con el contenido + "\v" como caracter fin de mensaje.
  * - Parar el servidor ("stopserver\r\n"). Se devuelve "Adiós\n".
  * - Terminar la comunicación ("quit\r\n"). Se devuelve "Adiós\n".
  *
