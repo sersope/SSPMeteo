@@ -10,13 +10,14 @@ APP_DIR=os.path.dirname(os.path.realpath(__file__))
 UI_FILE = os.path.join(APP_DIR,'sspmeteo_gui.glade')
 
 
-labels = ['a_temp_out','a_hum_out','a_dew_out','d_rain','m_rain','y_rain','a_wind_gust','d_wind_gust',
-          'a_wind_dir','a_rel_pressure','a_temp_in']
-       #~ 'a_hum_in','d_temp_out_max','d_temp_out_min','d_hum_out_max','d_hum_out_min','d_rel_pressure_max',
-       #~ 'd_rel_pressure_min','d_temp_in_max','d_temp_in_min','d_hum_in_max',
-       #~ 'd_hum_in_min','m_temp_out_max_hi','m_temp_out_min_lo','m_hum_out_max','m_hum_out_min',
+labels = ['a_temp_out','a_hum_out','a_dew_out','d_rain','h_rain','d_rain','a_wind_vel','d_wind_vel',
+          'a_wind_dir','a_rel_pressure','a_temp_in', 'd_temp_out_max', 'd_temp_out_min',
+          'd_hum_out_max','d_hum_out_min', 'd_temp_in_max', 'd_temp_in_min',
+          'd_rel_pressure_max', 'd_rel_pressure_min']
+       #~ 'd_hum_in_max',
+       #~ 'm_temp_out_max_hi','m_temp_out_min_lo','m_hum_out_max','m_hum_out_min',
        #~ 'm_rel_pressure_max','m_rel_pressure_min','m_wind_gust','m_temp_in_max_hi',
-       #~ 'm_temp_in_min_lo','m_hum_in_max','m_hum_in_min','y_temp_out_max_hi','y_temp_out_min_lo',
+       #~ 'm_temp_in_min_lo','y_temp_out_max_hi','y_temp_out_min_lo',
        #~ 'y_hum_out_max','y_hum_out_min','y_rel_pressure_max','y_rel_pressure_min','y_wind_gust',
        #~ 'y_temp_in_max_hi','y_temp_in_min_lo','y_hum_in_max','y_hum_in_min'
        #~ ]
@@ -38,7 +39,7 @@ class MainWindow(object):
         self.builder.add_from_file(UI_FILE)
         self.builder.connect_signals(self)
         self.win=self.builder.get_object('window1')
-        self.graf_box=self.builder.get_object('graf_box')
+        self.grid_graf=self.builder.get_object('grid_graf')
         #~ self.grid1 = self.builder.get_object('grid1')
         #~ self.calendario = Gtk.Calendar()
         #~ self.grid1.attach(self.calendario,6,2,1,1)
@@ -50,24 +51,35 @@ class MainWindow(object):
         for label in labels:
             self.ui_label[label] = self.builder.get_object(label)
 
-        self.grafico1 = StripChart(ancho=800, alto=150, font_face='Noto Sans', font_size=11)
-        self.grafico2 = StripChart(alto=150, font_face='Noto Sans', font_size=11)
-        self.grafico3 = StripChart(alto=150, font_face='Noto Sans', font_size=11)
-        self.grafico4 = StripChart(alto=150, font_face='Noto Sans', font_size=11)
-        self.graf_box.pack_start(self.grafico1,True,True,0)
-        self.graf_box.pack_start(self.grafico2,True,True,0)
-        self.graf_box.pack_start(self.grafico3,True,True,0)
-        self.graf_box.pack_start(self.grafico4,True,True,0)
-        self.grafico1.set_ejes(duracion, intervalo_muestreo, None, None,5)
-        self.grafico2.set_ejes(duracion, intervalo_muestreo, None, None,10)
-        self.grafico3.set_ejes(duracion, intervalo_muestreo, None, None,5)
-        self.grafico4.set_ejes(duracion, intervalo_muestreo, 0, None,5)
+        ancho = 400
+        alto = 150
+        self.grafico1 = StripChart(ancho, alto, font_face='Noto Sans', font_size=11)
+        self.grafico2 = StripChart(ancho, alto, font_face='Noto Sans', font_size=11)
+        self.grafico3 = StripChart(ancho, alto, font_face='Noto Sans', font_size=11)
+        self.grafico4 = StripChart(ancho, alto, tipo='puntos', font_face='Noto Sans', font_size=11)
+        self.grafico5 = StripChart(ancho, alto, font_face='Noto Sans', font_size=11)
+        self.grafico6 = StripChart(ancho, alto, font_face='Noto Sans', font_size=11)
+        self.grid_graf.attach(self.grafico1,0,0,1,1)
+        self.grid_graf.attach(self.grafico2,1,0,1,1)
+        self.grid_graf.attach(self.grafico3,0,1,1,1)
+        self.grid_graf.attach(self.grafico4,1,1,1,1)
+        self.grid_graf.attach(self.grafico5,0,2,1,1)
+        self.grid_graf.attach(self.grafico6,1,2,1,1)
+        self.grafico1.set_ejes(duracion, intervalo_muestreo, None, None, 5)
         self.grafico1.add_serie('Temperatura exterior (ºC)', Color.asulito)
         self.grafico1.add_serie('Temperatura interior (ºC)', Color.morado)
+        self.grafico2.set_ejes(duracion, intervalo_muestreo, None, None,10)
         self.grafico2.add_serie('Humedad exterior (%)', Color.asulito)
-        self.grafico3.add_serie('Presión (mbar)', Color.negro)
-        self.grafico4.add_serie('Velocidad del viento (km/h)', Color.naranja)
-        self.grafico4.add_serie('Rachas (km/h)', Color.rojo)
+        self.grafico3.set_ejes(duracion, intervalo_muestreo, 0, 20, 5)
+        self.grafico3.add_serie('Velocidad del viento (km/h)', Color.naranja)
+        self.grafico3.add_serie('Rachas (km/h)', Color.morado)
+        self.grafico4.set_ejes(duracion, intervalo_muestreo, 0, 360, 90)
+        self.grafico4.add_serie('Dirección del viento (º)', Color.rojo)
+        self.grafico5.set_ejes(duracion, intervalo_muestreo, None, None, 1)
+        self.grafico5.add_serie('Presión (mbar)', Color.negro)
+        self.grafico6.set_ejes(duracion, intervalo_muestreo, 0, 20, 5)
+        self.grafico6.add_serie('Lluvia (mm)', Color.asulito)
+        self.grafico6.add_serie('Lluvia últ. hora (mm)', Color.naranja)
 
         self.win.show_all()
         self._update_inicial_graficos()
@@ -100,18 +112,33 @@ class MainWindow(object):
             self.ui_label[l].set_label(f.format(v))
         self.status = 'Último acceso: ' + datetime.now().strftime('%x %X') +\
                       '  Recepción: {:5.1f}%'.format(100.0 * datos[11] / 54.0)
+        # Datos calculados
+        self.ui_label['d_temp_out_max'].set_label(str(self.grafico1.datos[0].maximo))
+        self.ui_label['d_temp_out_min'].set_label(str(self.grafico1.datos[0].minimo))
+        self.ui_label['d_temp_in_max'].set_label(str(self.grafico1.datos[1].maximo))
+        self.ui_label['d_temp_in_min'].set_label(str(self.grafico1.datos[1].minimo))
+        self.ui_label['d_hum_out_max'].set_label(str(self.grafico2.datos[0].maximo))
+        self.ui_label['d_hum_out_min'].set_label(str(self.grafico2.datos[0].minimo))
+        self.ui_label['d_wind_vel'].set_label(str(round(self.grafico3.datos[0].maximo,1)))
+        self.ui_label['d_rel_pressure_max'].set_label(str(round(self.grafico5.datos[0].maximo,1)))
+        self.ui_label['d_rel_pressure_min'].set_label(str(round(self.grafico5.datos[0].minimo,1)))
 
     def _update_graficos(self,datos):
         self.grafico1.add_valor(0, datos[0])
         self.grafico1.add_valor(1, datos[10])
         self.grafico2.add_valor(0, datos[1])
-        self.grafico3.add_valor(0, datos[9])
-        self.grafico4.add_valor(0, datos[6])
-        self.grafico4.add_valor(1, datos[7])
+        self.grafico3.add_valor(0, datos[6])
+        self.grafico3.add_valor(1, datos[7])
+        self.grafico4.add_valor(0, datos[8])
+        self.grafico5.add_valor(0, datos[9])
+        self.grafico6.add_valor(0, datos[5])
+        self.grafico6.add_valor(1, datos[4])
         self.grafico1.update()
         self.grafico2.update()
         self.grafico3.update()
         self.grafico4.update()
+        self.grafico5.update()
+        self.grafico6.update()
 
     def _update_ui(self):
         global err_conexion
@@ -144,5 +171,6 @@ err_conexion = False
 conexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('Conectando...')
 conexion.connect(('192.168.1.20', 5556))
+print('Conectado.')
 MainWindow().run()
 conexion.close()

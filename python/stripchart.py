@@ -19,11 +19,12 @@ class Serie:
     titulo = ''
     color = (0, 0, 0)   # tupla (r, g ,b)
     puntos = None       # deque de valores y
-
+    maximo = float('-inf')
+    minimo = float('inf')
 
 class StripChart(Gtk.DrawingArea):
 
-    def __init__(self, ancho=500, alto=250, font_face= '', font_size=11):
+    def __init__(self, ancho=500, alto=250, tipo='linea', font_face= '', font_size=11):
         Gtk.DrawingArea.__init__(self)
         self.set_size_request(ancho, alto)
         self.connect("draw", self._on_draw)
@@ -37,10 +38,11 @@ class StripChart(Gtk.DrawingArea):
         self.ahora = datetime.now()
         self.datos = []         # Contiene las series
         self.inter_val = 10
+        self.tipo = tipo
         self.font_size = font_size
         self.font_face = font_face
         self.b_izq = 0          # Bordes
-        self.b_der = 0          # Bordes
+        self.b_der = 5          # Bordes
         self.b_sup = 0          # Bordes
         self.b_inf = 0          # Bordes
         self.wrect = 0          # Dimensiones de la ventana del widget
@@ -78,7 +80,7 @@ class StripChart(Gtk.DrawingArea):
         # Anchura bordes
         t_vmax = str(self.val_max)
         t_vmin = str(self.val_min)
-        self.b_izq = self.b_der = font_ancho + max(ct.text_extents(t_vmax)[2], ct.text_extents(t_vmin)[2])
+        self.b_izq = font_ancho + max(ct.text_extents(t_vmax)[2], ct.text_extents(t_vmin)[2])
         self.b_sup = self.b_inf = font_alto
         # Area del grafico
         self.wrect = self.get_allocation()
@@ -117,19 +119,20 @@ class StripChart(Gtk.DrawingArea):
             ct.stroke()
             cursor_hora = datetime.strftime(self.ahora - timedelta(seconds = self.cursor_tiempo), "%x %H:%M")
             texto = str(cursor_hora)
+            for serie in self.datos:
+                punto = serie.puntos[self.cursor_index]
+                texto += '  ' + str(round(float(punto),1))
             texto_ext = ct.text_extents(texto)[4]
             y = self.wrect.height - font_desc
             if self.cursor_x > self.wrect.width/2 or not self.cursor_on:
                 ct.move_to(x - texto_ext, y)
             else:
                 ct.move_to(x, y)
-            ct.show_text(texto)
+            ct.show_text(str(cursor_hora))
             for serie in self.datos:
                 punto = serie.puntos[self.cursor_index]
-                ct.set_source_rgb(*Color.negro)
-                y = self.b_sup + self.g_alto - (punto - self.val_min) * self.g_alto / (self.val_max - self.val_min)
-                ct.move_to(self.b_izq + self.g_ancho, y)
-                ct.show_text(str(round(float(punto),1)))
+                ct.set_source_rgb(*serie.color)
+                ct.show_text( '  ' + str(round(float(punto),1)))
         # Leyenda
         ct.move_to(self.b_izq, self.b_sup - font_desc)
         for serie in self.datos:
@@ -149,9 +152,13 @@ class StripChart(Gtk.DrawingArea):
             for y in serie.puntos:
                 dx = x * self.g_ancho / self.duracion
                 dy = (y - self.val_min) * self.g_alto / (self.val_max - self.val_min)
-                if x==0:
-                    ct.move_to(x0, y0 - dy -1)
-                ct.line_to(x0 - dx, y0 - dy)
+                if self.tipo == 'linea':
+                    if x==0:
+                        ct.move_to(x0, y0 - dy -1)
+                    ct.line_to(x0 - dx, y0 - dy)
+                else:
+                    ct.new_sub_path()
+                    ct.arc(x0 - dx, y0 - dy, 1, 0, 2*3.1416)
                 x += self.intervalo
             ct.stroke()
 
@@ -169,22 +176,27 @@ class StripChart(Gtk.DrawingArea):
         s.puntos = deque()
         self.datos.append(s)
 
-    def add_valor(self, serie, valor):
-        if serie >= 0 and serie < len(self.datos):
-            self.datos[serie].puntos.appendleft(valor)
+    def add_valor(self, nserie, valor):
+        if nserie >= 0 and nserie < len(self.datos):
+            serie = self.datos[nserie]
+            serie.puntos.appendleft(valor)
+            serie.maximo = max(serie.maximo, valor)
+            serie.minimo = min(serie.minimo, valor)
+            # Determina valores extremos del eje y
             if self.val_max == None or self.val_min == None:
                 if self.val_max == None:
                     self.val_max = valor - (valor % self.inter_val) + self.inter_val
                 if self.val_min == None:
-                    self.val_min = valor - (valor % self.inter_val) - self.inter_val
+                    self.val_min = valor - (valor % self.inter_val)# - self.inter_val
             else:
-                if valor >= self.val_max:
+                if valor > self.val_max:
                     self.val_max = valor - (valor % self.inter_val) + self.inter_val
-                elif valor <= self.val_min:
-                    self.val_min = valor - (valor % self.inter_val) - self.inter_val
-            t = len(self.datos[serie].puntos)
+                elif valor < self.val_min:
+                    self.val_min = valor - (valor % self.inter_val)# - self.inter_val
+            # Elimina de la cola el punto mas antiguo cuando la grafica está completa
+            t = len(serie.puntos)
             if t > (self.duracion / self.intervalo + 1):
-                self.datos[serie].puntos.pop()
+                serie.puntos.pop()
 
     # Solo llamar cuando se anyaden nuevos valores
     def update(self):
@@ -197,15 +209,15 @@ def test():
     import random
 
     def timer():
-        grafico.add_valor(0, random.randint(10,30))
+        grafico.add_valor(0, random.randint(0,100))
         #~ grafico.add_valor(1, random.randint(20,30))
         #~ grafico.add_valor(2, random.randint(70,90))
         grafico.update()
         return True
 
-    intervalo_muestreo = 5
-    duracion = 5 * 60 * 60
-    grafico = StripChart(900,150, font_face = 'Noto Sans', font_size=10)
+    intervalo_muestreo = 1
+    duracion = 5 * 60
+    grafico = StripChart(900,150, tipo = 'puntos', font_face = 'Noto Sans', font_size=10)
     grafico.set_ejes(duracion, intervalo_muestreo, None, None, 2)
     grafico.add_serie(titulo='T. exterior (ºC)', color=Color.asulito)
     #~ grafico.add_serie('T. interior (ºC)', Color.morado)

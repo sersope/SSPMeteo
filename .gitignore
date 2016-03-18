@@ -14,3 +14,4 @@ doxygen/html
 doxygen/latex
 doxygen/rtf
 *.pyc
+*.glade~
