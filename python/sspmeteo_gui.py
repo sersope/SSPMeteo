@@ -13,14 +13,7 @@ UI_FILE = os.path.join(APP_DIR,'sspmeteo_gui.glade')
 labels = ['a_temp_out','a_hum_out','a_dew_out','d_rain','h_rain','d_rain','a_wind_vel','d_wind_vel',
           'a_wind_dir','a_rel_pressure','a_temp_in', 'd_temp_out_max', 'd_temp_out_min',
           'd_hum_out_max','d_hum_out_min', 'd_temp_in_max', 'd_temp_in_min',
-          'd_rel_pressure_max', 'd_rel_pressure_min']
-       #~ 'd_hum_in_max',
-       #~ 'm_temp_out_max_hi','m_temp_out_min_lo','m_hum_out_max','m_hum_out_min',
-       #~ 'm_rel_pressure_max','m_rel_pressure_min','m_wind_gust','m_temp_in_max_hi',
-       #~ 'm_temp_in_min_lo','y_temp_out_max_hi','y_temp_out_min_lo',
-       #~ 'y_hum_out_max','y_hum_out_min','y_rel_pressure_max','y_rel_pressure_min','y_wind_gust',
-       #~ 'y_temp_in_max_hi','y_temp_in_min_lo','y_hum_in_max','y_hum_in_min'
-       #~ ]
+          'd_rel_pressure_max', 'd_rel_pressure_min', 'd_wind_racha']
 
 
 formatos = ['{:5.1f} ºC','{:5.1f} %','{:5.1f} ºC','{:5.1f} mm','{:5.1f} mm','{:5.1f} mm','{:5.1f} km/h',
@@ -101,7 +94,7 @@ class MainWindow(object):
                 err_conexion = True
                 self.status += ' ERROR DE CONEXION.'
                 return
-        lineas_fichero = fichero[:-2].split('\n')   # Quita '\n\v' del final
+        lineas_fichero = fichero[:-2].split('\n')   # Quita '\n\v' del final del fichero
         for linea in lineas_fichero:
             linea_sin_hora = linea.split(',')[2:]   # Elimina fecha y hora al principio
             datos=[float(x) for x in linea_sin_hora]
@@ -120,6 +113,7 @@ class MainWindow(object):
         self.ui_label['d_hum_out_max'].set_label(str(self.grafico2.datos[0].maximo))
         self.ui_label['d_hum_out_min'].set_label(str(self.grafico2.datos[0].minimo))
         self.ui_label['d_wind_vel'].set_label(str(round(self.grafico3.datos[0].maximo,1)))
+        self.ui_label['d_wind_racha'].set_label(str(round(self.grafico3.datos[1].maximo,1)))
         self.ui_label['d_rel_pressure_max'].set_label(str(round(self.grafico5.datos[0].maximo,1)))
         self.ui_label['d_rel_pressure_min'].set_label(str(round(self.grafico5.datos[0].minimo,1)))
 
